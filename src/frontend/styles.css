@@ -1,0 +1,56 @@
+html {
+    background-color: rgb(41, 41, 41);
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    /* force it to be full height 
+       to make the height in text-content work*/
+}
+
+p, h1, label {
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(228, 228, 228);
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.file-picker {
+    background-color: red;
+    height: 100vh;
+}
+
+.code-container {
+    height: 100vh;
+    flex-grow: 1;
+}
+
+#pages-container {
+    width: 50%;
+    overflow: scroll;
+    scrollbar-width: none;
+
+    canvas {
+        display: block;
+    }
+}
+
+#pages-container::-webkit-scrollbar {
+    display: none;
+}
+
+#editor {
+    font-family: "Consolas", "Courier New", Courier, monospace;
+    
+    .syntax-default {
+        color: white
+    }
+    .syntax-command {
+        color: blue
+    }
+}
