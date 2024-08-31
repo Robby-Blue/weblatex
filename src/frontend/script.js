@@ -186,7 +186,7 @@ function tokenize(src) {
 
       if (activeTokens.length > 0 && bestMatch.type == "stop") {
         if (bestMatch.condition.inclusive) {
-          for (let k = 0; k < bestScore-1; k++) {
+          for (let k = 0; k < bestScore - 1; k++) {
             tokens.at(-1).text += src[i++];
             if (i == src.length) break;
           }
@@ -267,5 +267,42 @@ function updateHightlighting() {
   setCaretPosition(offset);
 }
 
-editorDiv.addEventListener("input", updateHightlighting);
+async function uploadFile() {
+  let offset = getCaretPosition(editorDiv);
+  let src = getSrcText()
+  setCaretPosition(offset);
+
+  let res = await fetch("/upload-file", {
+    method: "POST",
+    body: JSON.stringify({ text: src }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return res.status == 200;
+}
+
+async function updatePDF() {
+  let res = await fetch("/compile-pdf", {
+    method: "POST",
+  });
+  if(res.status != 200) return
+  renderPDF()
+}
+
+let uploadTimeoutId = null;
+
+function onInput() {
+  updateHightlighting();
+  if (uploadTimeoutId) {
+    clearTimeout(uploadTimeoutId);
+  }
+  uploadTimeoutId = setTimeout(async () => {
+    let success = await uploadFile();
+    if (!success) return;
+    updatePDF();
+  }, 1000);
+}
+
+editorDiv.addEventListener("input", onInput);
 updateHightlighting();
