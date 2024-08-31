@@ -1,31 +1,30 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, Response
 
 # pdflatex -interaction=nonstopmode -halt-on-error -output-directory=latex main.tex
 
 app = Flask(__name__)
 
+static_files = {
+    "pdf": ("compiler_workspace/output", "main.pdf"),
+    "script.js": ("frontend", "script.js"),
+    "styles.css": ("frontend", "styles.css"),
+    "pdf.mjs": ("frontend/pdfjs", "pdf.mjs"),
+    "pdf.worker.mjs": ("frontend/pdfjs", "pdf.worker.mjs"),
+}
+
 @app.route("/")
-def hello():
+def index():
     return send_from_directory("frontend", "index.html")
 
-@app.route("/pdf/")
-def pdf():
-    return send_from_directory("compiler_workspace/output", "main.pdf", as_attachment=False)
+@app.route("/<path:path>")
+def static_file(path):
+    if path.endswith("/"):
+        path = path[:-1]
 
-@app.route("/script.js/")
-def js():
-    return send_from_directory("frontend/", "script.js")
+    if path not in static_files:
+        return Response(status=404)
 
-@app.route("/styles.css/")
-def css():
-    return send_from_directory("frontend/", "styles.css")
-
-@app.route("/pdf.mjs/")
-def pdfjs():
-    return send_from_directory("frontend/pdfjs", "pdf.mjs")
-
-@app.route("/pdf.worker.mjs/")
-def pdfworkerjs():
-    return send_from_directory("frontend/pdfjs", "pdf.worker.mjs")
+    file_path, name = static_files[path]
+    return send_from_directory(file_path, name)
 
 app.run(host="0.0.0.0", port=3000)
