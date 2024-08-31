@@ -1,6 +1,5 @@
-from flask import Flask, send_from_directory, Response
-
-# pdflatex -interaction=nonstopmode -halt-on-error -output-directory=latex main.tex
+from flask import Flask, send_from_directory, Response, request, jsonify
+import subprocess
 
 app = Flask(__name__)
 
@@ -15,6 +14,28 @@ static_files = {
 @app.route("/")
 def index():
     return send_from_directory("frontend", "index.html")
+
+@app.route("/upload-file", methods=["POST"])
+def upload_file():
+    data = request.json
+    if "text" not in data:
+        return Response(status=400)
+    text = data["text"]
+    with open("compiler_workspace/latex/main.tex", "w") as f:
+        f.write(text)
+    return Response(status=200)
+
+@app.route("/compile-pdf", methods=["POST"])
+def compile_pdf():
+    p = subprocess.Popen(["pdflatex", "-interaction=nonstopmode",
+        "-halt-on-error", "-output-directory=../output", "main.tex"],
+        cwd="compiler_workspace/latex",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT)
+    p.wait()
+    return jsonify({
+        "code": p.returncode
+    }), 200 if p.returncode == 0 else 403
 
 @app.route("/<path:path>")
 def static_file(path):
