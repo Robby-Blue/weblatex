@@ -202,7 +202,6 @@ function tokenize(src) {
       tokens.at(-1).text += src[i++];
     }
   }
-  console.table(tokens)
   return tokens;
 }
 

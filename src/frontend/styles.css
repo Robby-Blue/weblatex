@@ -65,13 +65,9 @@ p, pre {
 #pages-container {
     min-width: 50%;
     overflow: scroll;
-    scrollbar-width: none;
+    overflow-x: hidden;
 
     canvas {
         display: block;
     }
-}
-
-#pages-container::-webkit-scrollbar {
-    display: none;
 }
