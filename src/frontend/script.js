@@ -186,7 +186,7 @@ function tokenize(src) {
 
       if (activeTokens.length > 0 && bestMatch.type == "stop") {
         if (bestMatch.condition.inclusive) {
-          for (let k = 0; k < bestScore; k++) {
+          for (let k = 0; k < bestScore-1; k++) {
             tokens.at(-1).text += src[i++];
             if (i == src.length) break;
           }
@@ -202,6 +202,7 @@ function tokenize(src) {
       tokens.at(-1).text += src[i++];
     }
   }
+  console.table(tokens)
   return tokens;
 }
 
