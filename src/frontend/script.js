@@ -43,8 +43,7 @@ renderPDF();
 
 let editorDiv = document.getElementById("editor");
 
-function highlightSyntax() {
-  let src = getSrcText();
+function highlightSyntax(src) {
   let tokens = tokenize(src);
   showTokens(tokens);
 }
@@ -53,7 +52,9 @@ function getSrcText() {
   let src = "";
 
   for (let div of editorDiv.children) {
-    div.innerHTML = div.innerHTML.replaceAll("<br><br>", "\n");
+    if(div.innerHTML.includes("<br><br>")){
+      div.innerHTML = div.innerHTML.replaceAll("<br><br>", "\n");
+    }
     src += div.innerText + "\n";
   }
   while (src.endsWith("\n")) {
@@ -79,28 +80,46 @@ function showTokens(tokens) {
     }
   }
 
-  let html = "";
   let lastLineText = "";
+  let i = 0
   for (let line of lines) {
-    let lineText = "";
+    let lineText = ""
     for (let token of line) {
+      if (token.text.length == 0) continue;
       lineText += token.text;
     }
-    if (lineText.length == 0 && html.length != 0) continue;
+    if (lineText.length == 0 && i != 0) continue;
     lastLineText = lineText;
-    html += '<div class="line">';
+
+    let html = '<div class="line">';
     for (let token of line) {
       if (token.text.length == 0) continue;
       html += `<span class="syntax-${token.type.name}">${token.text}</span>`;
     }
     html += "</div>";
+    
+    let lineDiv = null
+    if(editorDiv.children.length >= i+1){
+       lineDiv = editorDiv.children[i]
+    }else{
+      lineDiv = document.createElement("div")
+      editorDiv.appendChild(lineDiv)
+    }
+    if(lineDiv.outerHTML != html){
+      lineDiv.outerHTML = html
+    } 
+    i+=1
   }
 
-  if (lastLineText.trim().length > 0) {
-    html += `<div class="line"><span> </span></div>`;
+  if(i > 0 && lastLineText.trim().length != 0){
+    let lineDiv = document.createElement("div")
+    editorDiv.appendChild(lineDiv)
+    lineDiv.outerHTML = '<div class="line"><span> </span></div>'
   }
 
-  editorDiv.innerHTML = html;
+  while(i+1 < editorDiv.children.length){
+    editorDiv.removeChild(editorDiv.children[i])
+  }
 }
 
 // good luck refactoring this
@@ -216,21 +235,22 @@ function meetsTokenCondition(condition, src, index) {
   }
 }
 
-function getCaretPosition() {
+function getCaretPosition(selectedDiv) {
   let caretPos = 0;
   let selection = window.getSelection();
   if (selection.rangeCount > 0) {
     let range = selection.getRangeAt(0);
     let preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(editorDiv);
+    preCaretRange.selectNodeContents(selectedDiv);
     preCaretRange.setEnd(range.endContainer, range.endOffset);
     caretPos = preCaretRange.toString().length;
   }
+
   return caretPos;
 }
 
-function setCaretPosition(position) {
-  const editableDiv = editorDiv;
+function setCaretPosition(position, selectedDiv) {
+  selectedDiv.focus()
   const range = document.createRange();
   const selection = window.getSelection();
 
@@ -255,23 +275,13 @@ function setCaretPosition(position) {
     }
   }
 
-  traverseNodes(editableDiv);
+  traverseNodes(selectedDiv);
 
   selection.removeAllRanges();
   selection.addRange(range);
 }
 
-function updateHightlighting() {
-  let offset = getCaretPosition(editorDiv);
-  highlightSyntax();
-  setCaretPosition(offset);
-}
-
-async function uploadFile() {
-  let offset = getCaretPosition(editorDiv);
-  let src = getSrcText()
-  setCaretPosition(offset);
-
+async function uploadFile(src) {
   let res = await fetch("/upload-file", {
     method: "POST",
     body: JSON.stringify({ text: src }),
@@ -293,16 +303,50 @@ async function updatePDF() {
 let uploadTimeoutId = null;
 
 function onInput() {
-  updateHightlighting();
+  let selectedDiv = getCaretParentDiv()
+  let offset = getCaretPosition(selectedDiv);
+  if(lastKey == "Enter"){
+    offset = 0
+  }
+
+  let selectedDivIndex = [...editorDiv.children].indexOf(selectedDiv)
+
+  let src = getSrcText();
+  highlightSyntax(src);
+
+  selectedDiv = editorDiv.children[selectedDivIndex]
+  setCaretPosition(offset, selectedDiv);
+
   if (uploadTimeoutId) {
     clearTimeout(uploadTimeoutId);
   }
   uploadTimeoutId = setTimeout(async () => {
-    let success = await uploadFile();
+    let success = await uploadFile(src);
     if (!success) return;
     updatePDF();
   }, 1000);
 }
 
+let lastKey = null
+function onKeydown(event) {
+  lastKey = event.key
+}
+
+function getCaretParentDiv() {
+  const selection = window.getSelection();
+
+  if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      let caretNode = range.startContainer;
+      while (caretNode && caretNode.nodeName !== "DIV") {
+          caretNode = caretNode.parentNode;
+      }
+      return caretNode;
+  }
+
+  return null;
+}
+
+editorDiv.addEventListener("keydown", onKeydown);
 editorDiv.addEventListener("input", onInput);
-updateHightlighting();
+highlightSyntax("");
