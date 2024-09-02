@@ -2,6 +2,8 @@ let { pdfjsLib } = globalThis;
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.mjs/";
 
+const pdfjsWorker = new pdfjsLib.PDFWorker();
+
 async function renderPage(page, canvas, parentWidth) {
   let canvasContext = canvas.getContext("2d");
 
@@ -19,7 +21,10 @@ async function renderPage(page, canvas, parentWidth) {
 }
 
 function renderPDF() {
-  pdfjsLib.getDocument("/pdf/").promise.then(async (pdf) => {
+  pdfjsLib.getDocument({
+      url: "/pdf/",
+      worker: pdfjsWorker
+    }).promise.then(async (pdf) => {
     let pages = pdf.numPages;
     let pagesContainer = document.getElementById("pages-container");
 
