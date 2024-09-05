@@ -21,27 +21,29 @@ async function renderPage(page, canvas, parentWidth) {
 }
 
 function renderPDF() {
-  pdfjsLib.getDocument({
+  pdfjsLib
+    .getDocument({
       url: "/pdf/",
-      worker: pdfjsWorker
-    }).promise.then(async (pdf) => {
-    let pages = pdf.numPages;
-    let pagesContainer = document.getElementById("pages-container");
+      worker: pdfjsWorker,
+    })
+    .promise.then(async (pdf) => {
+      let pages = pdf.numPages;
+      let pagesContainer = document.getElementById("pages-container");
 
-    let width = pagesContainer.offsetWidth;
+      let width = pagesContainer.offsetWidth;
 
-    for (let i = 0; i < pages; i++) {
-      let canvas = null;
-      if (pagesContainer.children.length <= i) {
-        canvas = document.createElement("canvas");
-        pagesContainer.appendChild(canvas);
-      } else {
-        canvas = pagesContainer.children.item(i);
+      for (let i = 0; i < pages; i++) {
+        let canvas = null;
+        if (pagesContainer.childNodes.length <= i) {
+          canvas = document.createElement("canvas");
+          pagesContainer.appendChild(canvas);
+        } else {
+          canvas = pagesContainer.childNodes.item(i);
+        }
+
+        renderPage(await pdf.getPage(i + 1), canvas, width);
       }
-
-      renderPage(await pdf.getPage(i + 1), canvas, width);
-    }
-  });
+    });
 }
 
 renderPDF();
@@ -56,17 +58,23 @@ function highlightSyntax(src) {
 function getSrcText() {
   let src = "";
 
-  for (let div of editorDiv.children) {
-    if(div.innerHTML.includes("<br><br>")){
-      div.innerHTML = div.innerHTML.replaceAll("<br><br>", "\n");
+  for (let node of editorDiv.childNodes) {
+    if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "DIV") {
+      if (node.innerHTML.includes("<br><br>")) {
+        node.innerHTML = node.innerHTML.replaceAll("<br><br>", "\n");
+      }
+      src += node.innerText + "\n";
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      src += node.textContent + "\n";
     }
-    src += div.innerText + "\n";
   }
   while (src.endsWith("\n")) {
     src = src.substring(0, src.length - 1);
   }
   src += "\n";
   src = src.replaceAll("\n\n", "\n \n");
+
+  console.log(src);
 
   return src;
 }
@@ -86,9 +94,9 @@ function showTokens(tokens) {
   }
 
   let lastLineText = "";
-  let i = 0
+  let i = 0;
   for (let line of lines) {
-    let lineText = ""
+    let lineText = "";
     for (let token of line) {
       if (token.text.length == 0) continue;
       lineText += token.text;
@@ -102,28 +110,36 @@ function showTokens(tokens) {
       html += `<span class="syntax-${token.type.name}">${token.text}</span>`;
     }
     html += "</div>";
-    
-    let lineDiv = null
-    if(editorDiv.children.length >= i+1){
-       lineDiv = editorDiv.children[i]
-    }else{
-      lineDiv = document.createElement("div")
-      editorDiv.appendChild(lineDiv)
+
+    for (let i = editorDiv.childNodes.length - 1; i >= 0; i--) {
+      const child = editorDiv.childNodes[i];
+
+      if (child.nodeType === Node.TEXT_NODE) {
+        editorDiv.removeChild(child);
+      }
     }
-    if(lineDiv.outerHTML != html){
-      lineDiv.outerHTML = html
-    } 
-    i+=1
+
+    let lineDiv = null;
+    if (editorDiv.childNodes.length >= i + 1) {
+      lineDiv = editorDiv.childNodes[i];
+    } else {
+      lineDiv = document.createElement("div");
+      editorDiv.appendChild(lineDiv);
+    }
+    if (lineDiv.outerHTML != html) {
+      lineDiv.outerHTML = html;
+    }
+    i += 1;
   }
 
-  if(i > 0 && lastLineText.trim().length != 0){
-    let lineDiv = document.createElement("div")
-    editorDiv.appendChild(lineDiv)
-    lineDiv.outerHTML = '<div class="line"><span> </span></div>'
+  if (i > 0 && lastLineText.trim().length != 0) {
+    let lineDiv = document.createElement("div");
+    editorDiv.appendChild(lineDiv);
+    lineDiv.outerHTML = '<div class="line"><span> </span></div>';
   }
 
-  while(i+1 < editorDiv.children.length){
-    editorDiv.removeChild(editorDiv.children[i])
+  while (i + 1 < editorDiv.childNodes.length) {
+    editorDiv.removeChild(editorDiv.childNodes[i]);
   }
 }
 
@@ -255,7 +271,7 @@ function getCaretPosition(selectedDiv) {
 }
 
 function setCaretPosition(position, selectedDiv) {
-  selectedDiv.focus()
+  selectedDiv.focus();
   const range = document.createRange();
   const selection = window.getSelection();
 
@@ -301,26 +317,28 @@ async function updatePDF() {
   let res = await fetch("/compile-pdf", {
     method: "POST",
   });
-  if(res.status != 200) return
-  renderPDF()
+  if (res.status != 200) return;
+  renderPDF();
 }
 
 let uploadTimeoutId = null;
 
 function onInput() {
-  let selectedDiv = getCaretParentDiv()
+  let selectedDiv = getCaretParentDiv();
   let offset = getCaretPosition(selectedDiv);
-  if(lastKey == "Enter"){
-    offset = 0
+  if (lastKey == "Enter") {
+    offset = 0;
   }
 
-  let selectedDivIndex = [...editorDiv.children].indexOf(selectedDiv)
+  let selectedDivIndex = [...editorDiv.childNodes].indexOf(selectedDiv);
 
   let src = getSrcText();
   highlightSyntax(src);
 
-  selectedDiv = editorDiv.children[selectedDivIndex]
-  setCaretPosition(offset, selectedDiv);
+  selectedDiv = editorDiv.childNodes[selectedDivIndex];
+  if (selectedDiv) {
+    setCaretPosition(offset, selectedDiv);
+  }
 
   if (uploadTimeoutId) {
     clearTimeout(uploadTimeoutId);
@@ -332,21 +350,21 @@ function onInput() {
   }, 1000);
 }
 
-let lastKey = null
+let lastKey = null;
 function onKeydown(event) {
-  lastKey = event.key
+  lastKey = event.key;
 }
 
 function getCaretParentDiv() {
   const selection = window.getSelection();
 
   if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      let caretNode = range.startContainer;
-      while (caretNode && caretNode.nodeName !== "DIV") {
-          caretNode = caretNode.parentNode;
-      }
-      return caretNode;
+    const range = selection.getRangeAt(0);
+    let caretNode = range.startContainer;
+    while (caretNode && caretNode.nodeName !== "DIV") {
+      caretNode = caretNode.parentNode;
+    }
+    return caretNode;
   }
 
   return null;
