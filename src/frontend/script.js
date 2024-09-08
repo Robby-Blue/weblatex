@@ -74,8 +74,6 @@ function getSrcText() {
   src += "\n";
   src = src.replaceAll("\n\n", "\n \n");
 
-  console.log(src);
-
   return src;
 }
 
@@ -303,7 +301,7 @@ function setCaretPosition(position, selectedDiv) {
 }
 
 async function uploadFile(src) {
-  let res = await fetch("/upload-file", {
+  let res = await fetch("/files", {
     method: "POST",
     body: JSON.stringify({ text: src }),
     headers: {
@@ -314,7 +312,7 @@ async function uploadFile(src) {
 }
 
 async function updatePDF() {
-  let res = await fetch("/compile-pdf", {
+  let res = await fetch("/pdf/compile", {
     method: "POST",
   });
   if (res.status != 200) return;
@@ -372,4 +370,6 @@ function getCaretParentDiv() {
 
 editorDiv.addEventListener("keydown", onKeydown);
 editorDiv.addEventListener("input", onInput);
-highlightSyntax("");
+
+let res = await fetch("/files");
+highlightSyntax(await res.text());

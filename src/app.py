@@ -15,8 +15,14 @@ static_files = {
 def index():
     return send_from_directory("frontend", "index.html")
 
-@app.route("/upload-file", methods=["POST"])
-def upload_file():
+@app.route("/files", methods=["GET"])
+def get_files():
+    with open("compiler_workspace/latex/main.tex", "r") as f:
+        text = f.read()
+    return text
+
+@app.route("/files", methods=["POST"])
+def upload_files():
     data = request.json
     if "text" not in data:
         return Response(status=400)
@@ -25,7 +31,7 @@ def upload_file():
         f.write(text)
     return Response(status=200)
 
-@app.route("/compile-pdf", methods=["POST"])
+@app.route("/pdf/compile", methods=["POST"])
 def compile_pdf():
     p = subprocess.Popen(["pdflatex", "-interaction=nonstopmode",
         "-halt-on-error", "-output-directory=../output", "main.tex"],
