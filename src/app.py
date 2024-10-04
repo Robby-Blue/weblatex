@@ -33,7 +33,7 @@ def upload_files():
 
 @app.route("/pdf/compile", methods=["POST"])
 def compile_pdf():
-    p = subprocess.Popen(["pdflatex", "-interaction=nonstopmode",
+    p = subprocess.Popen(["pdflatex", "--shell-escape", "-interaction=nonstopmode",
         "-halt-on-error", "-output-directory=../output", "main.tex"],
         cwd="compiler_workspace/latex",
         stdout=subprocess.PIPE,
