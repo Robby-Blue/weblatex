@@ -1,10 +1,21 @@
+import os
 from flask import Flask, send_from_directory, Response, request, jsonify
-import subprocess
+import docker
+
+path = os.path.realpath("compiler_workspace/latex")
+
+docker_client = docker.from_env()
+
+container = docker_client.containers.run("latex", detach=True, tty=True,
+    volumes={
+        path: {'bind': '/compile', 'mode': 'rw'}
+    }
+)
 
 app = Flask(__name__)
 
 static_files = {
-    "pdf": ("compiler_workspace/output", "main.pdf"),
+    "pdf": ("compiler_workspace/latex", "main.pdf"),
     "script.js": ("frontend", "script.js"),
     "styles.css": ("frontend", "styles.css"),
     "pdf.mjs": ("frontend/pdfjs", "pdf.mjs"),
@@ -33,15 +44,17 @@ def upload_files():
 
 @app.route("/pdf/compile", methods=["POST"])
 def compile_pdf():
-    p = subprocess.Popen(["pdflatex", "--shell-escape", "-interaction=nonstopmode",
-        "-halt-on-error", "-output-directory=../output", "main.tex"],
-        cwd="compiler_workspace/latex",
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT)
-    p.wait()
+    res = container.exec_run(["pdflatex", "--shell-escape", "-interaction=nonstopmode",
+        "-halt-on-error", "-output-directory=.", "main.tex"],
+        workdir="/compile")
+
+    code = res.exit_code
+    output = res.output.decode("UTF-8")
+
     return jsonify({
-        "code": p.returncode
-    }), 200 if p.returncode == 0 else 403
+        "code": code,
+        "output": output
+    }), 200 if code == 0 else 403
 
 @app.route("/<path:path>")
 def static_file(path):
