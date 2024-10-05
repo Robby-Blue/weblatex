@@ -373,3 +373,8 @@ editorDiv.addEventListener("input", onInput);
 
 let res = await fetch("/files");
 highlightSyntax(await res.text());
+
+let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://"
+let socketUrl = socketProtocol + location.host
+
+let socket = io.connect(socketUrl);

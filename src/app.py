@@ -1,18 +1,17 @@
 import os
 from flask import Flask, send_from_directory, Response, request, jsonify
+from flask_socketio import SocketIO
 import docker
 
 path = os.path.realpath("compiler_workspace/latex")
 
 docker_client = docker.from_env()
 
-container = docker_client.containers.run("latex", detach=True, tty=True,
-    volumes={
-        path: {'bind': '/compile', 'mode': 'rw'}
-    }
-)
+sockets = {}
+containers = {}
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 static_files = {
     "pdf": ("compiler_workspace/latex", "main.pdf"),
@@ -44,6 +43,9 @@ def upload_files():
 
 @app.route("/pdf/compile", methods=["POST"])
 def compile_pdf():
+    sid = sockets["main"]
+    container = containers[sid]
+
     res = container.exec_run(["pdflatex", "--shell-escape", "-interaction=nonstopmode",
         "-halt-on-error", "-output-directory=.", "main.tex"],
         workdir="/compile")
@@ -67,4 +69,36 @@ def static_file(path):
     file_path, name = static_files[path]
     return send_from_directory(file_path, name)
 
-app.run(host="0.0.0.0", port=3000)
+@socketio.on('connect')
+def handle_connect():
+    if "main" in sockets:
+        return
+
+    container = docker_client.containers.run("latex", detach=True, tty=True,
+        volumes={
+            path: {'bind': '/compile', 'mode': 'rw'}
+        },
+        user="1000:1000", # idk what 1000:1000 means exactly
+        # but it makes it not run as root
+        network_disabled=True
+    )
+
+    sockets["main"] = request.sid
+    containers[request.sid] = container
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    if request.sid not in containers:
+        return
+    
+    container = containers[request.sid]
+    container.kill()
+
+    sockets.pop("main") 
+    containers.pop(request.sid)
+
+@socketio.on('message')
+def handle_message(data):
+    pass
+
+socketio.run(app, host="0.0.0.0", port=3000)
