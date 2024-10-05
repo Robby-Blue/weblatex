@@ -16,9 +16,7 @@ socketio = SocketIO(app)
 static_files = {
     "pdf": ("compiler_workspace/latex", "main.pdf"),
     "script.js": ("frontend", "script.js"),
-    "styles.css": ("frontend", "styles.css"),
-    "pdf.mjs": ("frontend/pdfjs", "pdf.mjs"),
-    "pdf.worker.mjs": ("frontend/pdfjs", "pdf.worker.mjs"),
+    "styles.css": ("frontend", "styles.css")
 }
 
 @app.route("/")
