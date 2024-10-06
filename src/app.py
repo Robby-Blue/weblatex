@@ -7,10 +7,10 @@ docker.init()
 sockets = {}
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='eventlet')
 
 static_files = {
-    "pdf": ("compiler_workspace/latex", "main.pdf"),
+    "pdf": ("compiler_workspace", "main.pdf"),
     "script.js": ("frontend", "script.js"),
     "styles.css": ("frontend", "styles.css")
 }
@@ -21,7 +21,7 @@ def index():
 
 @app.route("/files", methods=["GET"])
 def get_files():
-    with open("compiler_workspace/latex/main.tex", "r") as f:
+    with open("compiler_workspace/main.tex", "r") as f:
         text = f.read()
     return text
 
@@ -31,7 +31,7 @@ def upload_files():
     if "text" not in data:
         return Response(status=400)
     text = data["text"]
-    with open("compiler_workspace/latex/main.tex", "w") as f:
+    with open("compiler_workspace/main.tex", "w") as f:
         f.write(text)
     return Response(status=200)
 
