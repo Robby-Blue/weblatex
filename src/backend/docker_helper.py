@@ -33,16 +33,20 @@ def build_image():
     )
 
 def start_container(sid):
-    path = os.path.realpath("compiler_workspace/latex")
+    path = os.path.realpath("/var/lib/weblatex")
 
     container = docker_client.containers.run(image_name, detach=True, tty=True,
         volumes={
-            path: {'bind': '/compile', 'mode': 'rw'}
+            path: {"bind": "/compile", "mode": "rw"}
         },
-        user="1000:1000", # idk what 1000:1000 means exactly
-        # but it makes it not run as root
         network_disabled=True
     )
+    # this runs it as root
+    # because it needs root to write the output pdf
+    # but it doesnt have internet and access
+    # to nothing but the project itself
+    # this hopefully makes it secure enough
+
     containers[sid] = container
 
 def has_container(sid):
