@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory, Response, request, jsonify
 from flask_socketio import SocketIO
 
 import backend.docker_helper as docker
+docker.init()
 
 sockets = {}
 

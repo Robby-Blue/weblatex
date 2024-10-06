@@ -6,6 +6,32 @@ image_name = "weblatex-compilation"
 docker_client = docker.from_env()
 containers = {}
 
+def init():
+    if not has_image():
+        print(image_name, "not found")
+        print("creating new image")
+        print("this will take a long time")
+
+        build_image()
+
+        print("built image")
+
+def has_image():
+    images = docker_client.images.list()
+    for image in images:
+        for tag in image.tags:
+            if tag != f"{image_name}:latest":
+                continue
+            return True
+    return False
+
+def build_image():
+    docker_client.images.build(
+        path="compilation_docker",
+        tag=image_name,
+        rm=True
+    )
+
 def start_container(sid):
     path = os.path.realpath("compiler_workspace/latex")
 
