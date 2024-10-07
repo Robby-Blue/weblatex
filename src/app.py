@@ -12,6 +12,9 @@ socketio = SocketIO(app, async_mode='eventlet')
 static_files = {
     "pdf": ("compiler_workspace", "main.pdf"),
     "script.js": ("frontend", "script.js"),
+    "pdf-viewer.js": ("frontend", "pdf-viewer.js"),
+    "code-editor.js": ("frontend", "code-editor.js"),
+    "latex-tokenizer.js": ("frontend", "latex-tokenizer.js"),
     "styles.css": ("frontend", "styles.css")
 }
 
