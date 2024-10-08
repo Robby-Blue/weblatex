@@ -1,5 +1,6 @@
 from flask import Flask, send_from_directory, Response, request, jsonify
 from flask_socketio import SocketIO
+import os
 
 import backend.docker_helper as docker
 docker.init()
@@ -14,6 +15,7 @@ static_files = {
     "script.js": ("frontend", "script.js"),
     "pdf-viewer.js": ("frontend", "pdf-viewer.js"),
     "code-editor.js": ("frontend", "code-editor.js"),
+    "file-system.js": ("frontend", "file-system.js"),
     "latex-tokenizer.js": ("frontend", "latex-tokenizer.js"),
     "styles.css": ("frontend", "styles.css")
 }
@@ -22,19 +24,48 @@ static_files = {
 def index():
     return send_from_directory("frontend", "index.html")
 
-@app.route("/files", methods=["GET"])
-def get_files():
-    with open("compiler_workspace/main.tex", "r") as f:
-        text = f.read()
-    return text
+@app.route("/files/", defaults={'path': ''}, methods=["GET"])
+@app.route("/files/<path:path>", methods=["GET"])
+def get_files(path):
+    fs_path = get_rel_path("compiler_workspace", path)
 
-@app.route("/files", methods=["POST"])
-def upload_files():
+    if not fs_path:
+        return "bad path", 400
+    if not os.path.exists(fs_path):
+        return "file not found", 404
+    
+    if os.path.isfile(fs_path):
+        with open(fs_path, "r") as f:
+            text = f.read()
+        return text
+    else:
+        files = []
+        for file_name in os.listdir(fs_path):
+            file_path = os.path.join(fs_path, file_name)
+
+            files.append({
+                "name": file_name,
+                "is_file": os.path.isfile(file_path)
+            })
+        return files 
+
+@app.route("/files/<path:path>", methods=["POST"])
+def upload_files(path):
     data = request.json
     if "text" not in data:
         return Response(status=400)
+    
+    fs_path = get_rel_path("compiler_workspace", path)
+
+    if not fs_path:
+        return "bad path", 400
+    if not os.path.exists(os.path.dirname(fs_path)):
+        return "bad parent", 400
+    if os.path.isdir(fs_path):
+        return "is folder", 400
+
     text = data["text"]
-    with open("compiler_workspace/main.tex", "w") as f:
+    with open(fs_path, "w") as f:
         f.write(text)
     return Response(status=200)
 
@@ -80,4 +111,12 @@ def handle_disconnect():
 def handle_message(data):
     pass
 
-socketio.run(app, host="0.0.0.0", port=3000)
+def get_rel_path(folder, path):
+    folder = os.path.abspath(folder)
+    fs_path = os.path.abspath(os.path.join(folder, path))
+
+    if not fs_path.startswith(folder):
+        return None
+    return fs_path
+
+socketio.run(app, host="0.0.0.0", port=3000, log_output=True)

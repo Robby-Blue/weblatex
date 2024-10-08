@@ -24,8 +24,14 @@ p, pre {
 }
 
 .file-picker {
-    background-color: red;
+    background-color: rgb(20, 20, 20);
+    width: 200px;
+    border: rgb(241, 241, 241);
     height: 100vh;
+
+    > p {
+        margin: 8px;
+    }
 }
 
 .code-container {
@@ -68,6 +74,7 @@ p, pre {
     min-width: 50%;
     overflow: scroll;
     overflow-x: hidden;
+    background-color: rgb(20, 20, 20);
 
     canvas {
         display: block;
