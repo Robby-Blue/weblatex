@@ -1,6 +1,8 @@
 import * as tokenizer from "/latex-tokenizer.js";
 
 let editorDiv = document.getElementById("editor");
+let input_cb = null;
+let lastKey = null;
 
 export function updateSyntaxHighlight(src) {
   let tokens = tokenizer.tokenize(src);
@@ -174,17 +176,16 @@ function highlightCurrentSyntax() {
   return src;
 }
 
-let input_cb = null;
 export function onInput(cb) {
   input_cb = cb;
 }
-
-let lastKey = null;
 
 editorDiv.addEventListener("keydown", (event) => {
   lastKey = event.key;
 });
 editorDiv.addEventListener("input", () => {
-  let src = highlightCurrentSyntax();
-  input_cb(src);
+  lastEditId = setTimeout(() => {
+    let src = highlightCurrentSyntax();
+    input_cb(src);
+  }, 0)
 });
