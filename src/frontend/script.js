@@ -1,10 +1,11 @@
 import * as pdf from "/pdf-viewer.js";
 import * as editor from "/code-editor.js";
+import * as fs from "/file-system.js";
 
 pdf.renderPDF();
 
 async function uploadFile(src) {
-  let res = await fetch("/files", {
+  let res = await fetch(`/files/${openFilePath}`, {
     method: "POST",
     body: JSON.stringify({ text: src }),
     headers: {
@@ -33,9 +34,6 @@ editor.onInput((src) => {
     updatePDF();
   }, 1000);
 });
-
-let res = await fetch("/files");
-editor.updateSyntaxHighlight(await res.text());
 
 let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;
