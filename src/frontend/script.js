@@ -4,17 +4,6 @@ import * as fs from "/file-system.js";
 
 pdf.renderPDF();
 
-async function uploadFile(src) {
-  let res = await fetch(`/files/${openFilePath}`, {
-    method: "POST",
-    body: JSON.stringify({ text: src }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return res.status == 200;
-}
-
 async function updatePDF() {
   let res = await fetch("/pdf/compile", {
     method: "POST",
@@ -29,7 +18,7 @@ editor.onInput((src) => {
     clearTimeout(uploadTimeoutId);
   }
   uploadTimeoutId = setTimeout(async () => {
-    let success = await uploadFile(src);
+    let success = await fs.updateCurrentFile(src);
     if (!success) return;
     updatePDF();
   }, 1000);
