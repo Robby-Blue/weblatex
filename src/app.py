@@ -1,6 +1,7 @@
 from flask import Flask, send_from_directory, Response, request, jsonify
 from flask_socketio import SocketIO
 import os
+import signal
 
 import backend.docker_helper as docker
 docker.init()
@@ -118,5 +119,10 @@ def get_rel_path(folder, path):
     if not fs_path.startswith(folder):
         return None
     return fs_path
+
+def handle_sigterm(*args):
+    socketio.stop()
+
+signal.signal(signal.SIGTERM, handle_sigterm)
 
 socketio.run(app, host="0.0.0.0", port=3000, log_output=True)
