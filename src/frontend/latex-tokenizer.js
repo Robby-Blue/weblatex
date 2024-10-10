@@ -3,40 +3,40 @@ export function tokenize(src) {
   let tokenTypes = [
     {
       name: "command",
-      start: [{ type: "char", char: "\\" }],
-      end: [{ type: "nonalphabetic" }],
+      start: [{ func: command() }],
+      end: [{ func: nonalphabetic() }],
     },
     {
       name: "brackets",
       start: [
-        { type: "char", char: "{" },
-        { type: "char", char: "[" },
+        { func: char("{") },
+        { func: char("[") },
       ],
       end: [
-        { type: "char", char: "]", inclusive: true },
-        { type: "char", char: "}", inclusive: true },
+        { func: char("]"), inclusive: true },
+        { func: char("}"), inclusive: true },
       ],
     },
     {
       name: "inlinemath",
       start: [
-        { type: "char", char: "$" },
-        { type: "char", char: "\\(" },
+        { func: char("$") },
+        { func: char("\\(") },
       ],
       end: [
-        { type: "char", char: "$", inclusive: true },
-        { type: "char", char: "\\)", inclusive: true },
+        { func: char("$"), inclusive: true },
+        { func: char("\\)"), inclusive: true },
       ],
     },
     {
       name: "math",
-      start: [{ type: "char", char: "\\[" }],
-      end: [{ type: "char", char: "\\]", inclusive: true }],
+      start: [{ func: char("\\[") }],
+      end: [{ func: char("\\]"), inclusive: true }],
     },
     {
       name: "comment",
-      start: [{ type: "char", char: "%" }],
-      end: [{ type: "char", char: "\n" }],
+      start: [{ func: char("%") }],
+      end: [{ func: char("\n") }],
     },
   ];
 
@@ -50,7 +50,10 @@ export function tokenize(src) {
     let bestScore = 0;
     for (let tokenType of tokenTypes) {
       for (let startCondition of tokenType.start) {
-        let thisMatch = meetsTokenCondition(startCondition, src, i);
+        let thisMatch = startCondition.func(src, i);
+        if(i>0 && src[i-1] == "\\"){
+          thisMatch = 0
+        }
         if (thisMatch > bestScore) {
           bestMatch = { type: "start", token: tokenType };
           bestScore = thisMatch;
@@ -59,7 +62,7 @@ export function tokenize(src) {
     }
     if (activeTokens.length > 0) {
       for (let endCondition of activeTokens.at(-1).end) {
-        let thisMatch = meetsTokenCondition(endCondition, src, i);
+        let thisMatch = endCondition.func(src, i);
         if (thisMatch) {
           thisMatch += 1;
         }
@@ -71,12 +74,12 @@ export function tokenize(src) {
     }
     if (bestMatch) {
       if (bestMatch.type == "start") {
-        tokens.push({ type: bestMatch.token, text: "" });
-        activeTokens.push(bestMatch.token);
-        for (let k = 0; k < bestScore; k++) {
-          tokens.at(-1).text += src[i++];
-          if (i == src.length) break;
-        }
+          tokens.push({ type: bestMatch.token, text: "" });
+          activeTokens.push(bestMatch.token);
+          for (let k = 0; k < bestScore; k++) {
+            tokens.at(-1).text += src[i++];
+            if (i == src.length) break;
+          }
       }
 
       if (activeTokens.length > 0 && bestMatch.type == "stop") {
@@ -100,13 +103,21 @@ export function tokenize(src) {
   return tokens;
 }
 
-function meetsTokenCondition(condition, src, index) {
-  if (condition.type == "any") {
-    return 1;
-  } else if (condition.type == "char") {
-    let len = condition.char.length;
-    return src.slice(index, index + len) == condition.char ? len : 0;
-  } else if (condition.type == "nonalphabetic") {
-    return !src[index].match(/[a-z]/i) ? 1 : 0;
+function char(text) {
+  return (src, index) => {
+    return src.slice(index, index + text.length) == text ? text.length : 0;
+  }
+}
+
+function nonalphabetic() {
+  return (src, index) => {
+    return !src[index].match(/[a-z0-9]/i) ? 1 : 0;
+  }
+}
+
+function command() {
+  return (src, index) => {
+    return char("\\")(src, index) &&
+      !nonalphabetic()(src, index + 1);
   }
 }
