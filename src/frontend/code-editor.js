@@ -4,6 +4,10 @@ let editorDiv = document.getElementById("editor");
 let input_cb = null;
 let lastKey = null;
 
+function htmlEncode(text){
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 export function updateSyntaxHighlight(src) {
   let tokens = tokenizer.tokenize(src);
   showTokens(tokens);
@@ -59,7 +63,7 @@ function showTokens(tokens) {
     let html = '<div class="line">';
     for (let token of line) {
       if (token.text.length == 0) continue;
-      html += `<span class="syntax-${token.type.name}">${token.text}</span>`;
+      html += `<span class="syntax-${token.type.name}">${htmlEncode(token.text)}</span>`;
     }
     html += "</div>";
 
@@ -184,7 +188,7 @@ editorDiv.addEventListener("keydown", (event) => {
   lastKey = event.key;
 });
 editorDiv.addEventListener("input", () => {
-  lastEditId = setTimeout(() => {
+  setTimeout(() => {
     let src = highlightCurrentSyntax();
     input_cb(src);
   }, 0)
