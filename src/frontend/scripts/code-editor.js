@@ -1,4 +1,9 @@
-import * as tokenizer from "/latex-tokenizer.js";
+import * as fs from "/file-system.js";
+import * as latex_tokenizer from "/latex-tokenizer.js";
+
+let tokenizers = {
+  ".tex": latex_tokenizer.tokenize
+}
 
 let editorDiv = document.getElementById("editor");
 let input_cb = null;
@@ -9,8 +14,30 @@ function htmlEncode(text){
 }
 
 export function updateSyntaxHighlight(src) {
-  let tokens = tokenizer.tokenize(src);
+  let tokenize = getTokenizer()
+  let tokens = tokenize(src);
   showTokens(tokens);
+}
+
+function getTokenizer() {
+  let fileName = fs.currentFilePath
+  let ending = fileName.substring(fileName.lastIndexOf("."))
+  console.log(ending)
+  if(!(ending in tokenizers)){
+    return nontokenize
+  }
+    return tokenizers[ending]
+}
+
+// when theres no tokenizer just return
+// everything as one big default token
+function nontokenize(src){
+  return [{
+    type: {
+      name: "default"
+    },
+    text: src
+  }]
 }
 
 function getSrcText() {

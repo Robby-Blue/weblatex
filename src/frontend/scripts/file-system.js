@@ -1,7 +1,7 @@
 import * as editor from "/code-editor.js";
 
-let currentFolderPath = ".";
-let currentFilePath = "main.tex";
+export let currentFolderPath = ".";
+export let currentFilePath = "main.tex";
 
 let folderCache = {};
 let fileCache = {};
@@ -10,15 +10,15 @@ let filePickerElement = document.querySelector(".files-list");
 let currentPathElement = document.querySelector(".current-path-text");
 
 currentPathElement.addEventListener("click", (event) => {
-    console.log("a")
-    if(currentFolderPath == "."){
-        return
-    }
-    let slashIndex = currentFolderPath.indexOf("/")
-    let newPath = currentFolderPath.substring(0, slashIndex)
-    console.log(newPath)
-    openFolder(newPath)
-})
+  console.log("a");
+  if (currentFolderPath == ".") {
+    return;
+  }
+  let slashIndex = currentFolderPath.indexOf("/");
+  let newPath = currentFolderPath.substring(0, slashIndex);
+  console.log(newPath);
+  openFolder(newPath);
+});
 
 async function getCached(cache, key, cb) {
   if (cache.hasOwnProperty(key)) {
@@ -31,9 +31,9 @@ async function getCached(cache, key, cb) {
 }
 
 async function openFolder(path) {
-    currentFolderPath = path
-    let pathText = "~" + path.substr(1)
-    currentPathElement.innerText = pathText
+  currentFolderPath = path;
+  let pathText = "~" + path.substr(1);
+  currentPathElement.innerText = pathText;
 
   let data = await getCached(folderCache, path, async () => {
     let res = await fetch(`/files/${path}`);
@@ -57,7 +57,7 @@ async function openFolder(path) {
 }
 
 async function openFile(path) {
-    currentFilePath = path
+  currentFilePath = path;
   let text = await getCached(fileCache, path, async () => {
     let res = await fetch(`/files/${path}`);
     return await res.text();
