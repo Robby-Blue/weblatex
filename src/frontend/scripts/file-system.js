@@ -10,13 +10,11 @@ let filePickerElement = document.querySelector(".files-list");
 let currentPathElement = document.querySelector(".current-path-text");
 
 currentPathElement.addEventListener("click", (event) => {
-  console.log("a");
   if (currentFolderPath == ".") {
     return;
   }
   let slashIndex = currentFolderPath.indexOf("/");
   let newPath = currentFolderPath.substring(0, slashIndex);
-  console.log(newPath);
   openFolder(newPath);
 });
 

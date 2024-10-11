@@ -22,11 +22,10 @@ export function updateSyntaxHighlight(src) {
 function getTokenizer() {
   let fileName = fs.currentFilePath
   let ending = fileName.substring(fileName.lastIndexOf("."))
-  console.log(ending)
   if(!(ending in tokenizers)){
     return nontokenize
   }
-    return tokenizers[ending]
+  return tokenizers[ending]
 }
 
 // when theres no tokenizer just return

@@ -17,6 +17,17 @@ p, pre {
     word-break: keep-all
 }
 
+button {
+    border-radius: 0;
+    border: none;
+    padding: 4px;
+    background-color: rgb(91, 206, 250);
+}
+
+button.red {
+    background-color: rgb(250, 91, 91);
+}
+
 .container {
     width: 100vw;
     display: flex;
@@ -35,17 +46,28 @@ p, pre {
     }
 }
 
+.code-header {
+    background-color: rgb(41, 41, 41);
+    width: 100%;
+    position: static;
+    top: 0;
+    padding-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
 .code-container {
     height: 100vh;
     width: 50%;
     flex-grow: 1;
-    overflow: scroll;
+    overflow: hidden;
 }
 
 #editor {
     font-family: "Consolas", "Courier New", Courier, monospace;
     height: 100vh;
     outline: none;
+    overflow: scroll;
 
     .syntax-default {
         color: #EEEEEE
