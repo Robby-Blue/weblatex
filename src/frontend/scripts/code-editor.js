@@ -2,41 +2,47 @@ import * as fs from "/file-system.js";
 import * as latex_tokenizer from "/latex-tokenizer.js";
 
 let tokenizers = {
-  ".tex": latex_tokenizer.tokenize
-}
+  ".tex": latex_tokenizer.tokenize,
+};
 
 let editorDiv = document.getElementById("editor");
 let input_cb = null;
 let lastKey = null;
 
-function htmlEncode(text){
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function htmlEncode(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 export function updateSyntaxHighlight(src) {
-  let tokenize = getTokenizer()
+  let tokenize = getTokenizer();
   let tokens = tokenize(src);
   showTokens(tokens);
 }
 
 function getTokenizer() {
-  let fileName = fs.currentFilePath
-  let ending = fileName.substring(fileName.lastIndexOf("."))
-  if(!(ending in tokenizers)){
-    return nontokenize
+  let fileName = fs.currentFilePath;
+  let ending = fileName.substring(fileName.lastIndexOf("."));
+  if (!(ending in tokenizers)) {
+    return nontokenize;
   }
-  return tokenizers[ending]
+  return tokenizers[ending];
 }
 
 // when theres no tokenizer just return
 // everything as one big default token
-function nontokenize(src){
-  return [{
-    type: {
-      name: "default"
+function nontokenize(src) {
+  return [
+    {
+      type: {
+        name: "default",
+      },
+      text: src,
     },
-    text: src
-  }]
+  ];
 }
 
 function getSrcText() {
@@ -89,7 +95,9 @@ function showTokens(tokens) {
     let html = '<div class="line">';
     for (let token of line) {
       if (token.text.length == 0) continue;
-      html += `<span class="syntax-${token.type.name}">${htmlEncode(token.text)}</span>`;
+      html += `<span class="syntax-${token.type.name}">${htmlEncode(
+        token.text
+      )}</span>`;
     }
     html += "</div>";
 
@@ -123,6 +131,29 @@ function showTokens(tokens) {
   while (i + 1 < editorDiv.childNodes.length) {
     editorDiv.removeChild(editorDiv.childNodes[i]);
   }
+}
+
+function getAbsoluteCaretPosition(div) {
+  let caretPos = 0;
+
+  for (let lineDiv of div.childNodes) {
+    let inLine = false;
+    for (let c of lineDiv.childNodes) {
+      let relPos = getCaretPosition(c);
+      if (relPos > c.innerText.length) {
+        relPos = c.innerText.length;
+      }
+      if (relPos > 0) {
+        inLine = true;
+      }
+      caretPos += relPos;
+    }
+    if (inLine) {
+      caretPos += 1;
+    }
+  }
+
+  return caretPos - 1;
 }
 
 function getCaretPosition(selectedDiv) {
@@ -213,9 +244,35 @@ export function onInput(cb) {
 editorDiv.addEventListener("keydown", (event) => {
   lastKey = event.key;
 });
+
 editorDiv.addEventListener("input", () => {
   setTimeout(() => {
     let src = highlightCurrentSyntax();
     input_cb(src);
-  }, 0)
+  }, 0);
+});
+
+editorDiv.addEventListener("paste", function (event) {
+  event.preventDefault();
+  const pastedData = event.clipboardData || window.clipboardData;
+  const pastedText = pastedData.getData("text");
+
+  let absOffset = getAbsoluteCaretPosition(editorDiv);
+  let selectedDiv = getCaretParentDiv();
+  let offset = getCaretPosition(selectedDiv);
+
+  let selectedDivIndex = [...editorDiv.childNodes].indexOf(selectedDiv);
+
+  let src = getSrcText();
+  let srcStart = src.substring(0, absOffset);
+  let srcEnd = src.substring(absOffset);
+  let newSrc = srcStart + pastedText + srcEnd;
+  updateSyntaxHighlight(newSrc);
+
+  selectedDiv = editorDiv.childNodes[selectedDivIndex];
+  if (selectedDiv) {
+    setCaretPosition(offset, selectedDiv);
+  }
+
+  return src;
 });
