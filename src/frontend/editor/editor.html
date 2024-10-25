@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>latex renderer</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/editor/editor.css">
+  <script src="https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.min.mjs" type="module"></script>
+  <script src="/editor/script.js/" type="module"></script>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="file-picker">
+      <p class="current-path-text"></p>
+      <hr>
+      <div class="files-list"></div>
+    </div>
+    <div class="code-container">
+      <div class="code-header">
+        <button>Settings</button>
+        <button id="compile-button">Compile</button>
+      </div>
+      <pre><div id="editor" spellcheck="false" contenteditable="true"></div></pre>
+    </div>
+    <div id="pages-container"></div>
+  </div>
+</body>
+</html>

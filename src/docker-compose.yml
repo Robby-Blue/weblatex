@@ -1,5 +1,6 @@
 services:
   weblatex:
+    build: .
     image: weblatex
     ports:
       - "3000:3000"

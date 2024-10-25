@@ -1,6 +1,6 @@
-import * as pdf from "/pdf-viewer.js";
-import * as editor from "/code-editor.js";
-import * as fs from "/file-system.js";
+import * as pdf from "/editor/pdf-viewer.js";
+import * as editor from "/editor/code-editor.js";
+import * as fs from "/editor/file-system.js";
 
 let compileButton = document.getElementById("compile-button")
 

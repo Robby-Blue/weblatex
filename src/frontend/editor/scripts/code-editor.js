@@ -1,5 +1,5 @@
-import * as fs from "/file-system.js";
-import * as latex_tokenizer from "/latex-tokenizer.js";
+import * as fs from "/editor/file-system.js";
+import * as latex_tokenizer from "/editor/latex-tokenizer.js";
 
 let tokenizers = {
   ".tex": latex_tokenizer.tokenize,

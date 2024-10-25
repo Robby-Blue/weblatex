@@ -5,25 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>latex renderer</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.min.mjs" type="module"></script>
-  <script src="/script.js/" type="module"></script>
-  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <link rel="stylesheet" href="login.css">
 </head>
 <body>
-  <div class="container">
-    <div class="file-picker">
-      <p class="current-path-text"></p>
-      <hr>
-      <div class="files-list"></div>
+    <div class="center-container">
+        <div class="login-container">
+            <h1>Login</h1>
+            <form action="/login/" method="POST">
+                <label for="username">username</label><br>
+                <input id="username"><br>
+                <label for="password">password</label><br>
+                <input id="password" type="password"><br>
+                <input id="login" type="submit"
+                    value="login" >
+            </form>
+        </div>
     </div>
-    <div class="code-container">
-      <div class="code-header">
-        <button>Settings</button>
-        <button id="compile-button">Compile</button>
-      </div>
-      <pre><div id="editor" spellcheck="false" contenteditable="true"></div></pre>
-    </div>
-    <div id="pages-container"></div>
-  </div>
 </body>
 </html>

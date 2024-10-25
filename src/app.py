@@ -12,18 +12,30 @@ app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
 
 static_files = {
-    "pdf": ("compiler_workspace", "main.pdf"),
-    "script.js": ("frontend/scripts", "script.js"),
-    "pdf-viewer.js": ("frontend/scripts", "pdf-viewer.js"),
-    "code-editor.js": ("frontend/scripts", "code-editor.js"),
-    "file-system.js": ("frontend/scripts", "file-system.js"),
-    "latex-tokenizer.js": ("frontend/scripts/tokenizers", "latex-tokenizer.js"),
-    "styles.css": ("frontend", "styles.css")
+    "": ("", "index.html"),
+    "styles.css": ("", "styles.css"),
+    "login.css": ("", "login.css"),
+    "editor": ("editor", "editor.html"),
+    "editor/script.js": ("editor/scripts", "script.js"),
+    "editor/pdf-viewer.js": ("editor/scripts", "pdf-viewer.js"),
+    "editor/code-editor.js": ("editor/scripts", "code-editor.js"),
+    "editor/file-system.js": ("editor/scripts", "file-system.js"),
+    "editor/latex-tokenizer.js": ("editor/scripts/tokenizers", "latex-tokenizer.js"),
+    "editor/editor.css": ("editor", "editor.css")
 }
 
-@app.route("/")
-def index():
-    return send_from_directory("frontend", "index.html")
+@app.route("/", defaults={'path': ''}, methods=["GET"])
+@app.route("/<path:path>")
+def static_file(path):
+    if path.endswith("/"):
+        path = path[:-1]
+
+    if path not in static_files:
+        return Response(status=404)
+
+    file_path, name = static_files[path]
+    file_path = os.path.join("frontend", file_path)
+    return send_from_directory(file_path, name)
 
 @app.route("/files/", defaults={'path': ''}, methods=["GET"])
 @app.route("/files/<path:path>", methods=["GET"])
@@ -80,17 +92,6 @@ def compile_pdf():
         "return_code": return_code,
         "log": log
     }), 200 if return_code == 0 else 403
-
-@app.route("/<path:path>")
-def static_file(path):
-    if path.endswith("/"):
-        path = path[:-1]
-
-    if path not in static_files:
-        return Response(status=404)
-
-    file_path, name = static_files[path]
-    return send_from_directory(file_path, name)
 
 @socketio.on('connect')
 def handle_connect():

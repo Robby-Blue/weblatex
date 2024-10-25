@@ -1,4 +1,4 @@
-import * as editor from "/code-editor.js";
+import * as editor from "/editor/code-editor.js";
 
 export let currentFolderPath = ".";
 export let currentFilePath = "main.tex";
