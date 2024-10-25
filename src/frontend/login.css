@@ -1,0 +1,19 @@
+body {
+    overflow: hidden;
+}
+
+.center-container {
+    margin: auto;
+    width: 50%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+input {
+    margin-bottom: 16px;
+    padding: 4px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+}
