@@ -7,3 +7,5 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/weblatex:/app/weblatex/compiler_workspace
+    env_file:
+      - .env

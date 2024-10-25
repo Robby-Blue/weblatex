@@ -1,9 +1,11 @@
-from flask import Flask, send_from_directory, Response, request, jsonify
+from flask import Flask, send_from_directory, Response, request, jsonify, redirect
 from flask_socketio import SocketIO
 import os
 import signal
 
-import backend.docker_helper as docker
+from backend import docker
+from backend import users
+
 docker.init()
 
 sockets = {}
@@ -12,9 +14,9 @@ app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
 
 static_files = {
-    "": ("", "index.html"),
     "styles.css": ("", "styles.css"),
-    "login.css": ("", "login.css"),
+    "login": ("login", "login.html"),
+    "login/login.css": ("login", "login.css"),
     "editor": ("editor", "editor.html"),
     "editor/script.js": ("editor/scripts", "script.js"),
     "editor/pdf-viewer.js": ("editor/scripts", "pdf-viewer.js"),
@@ -24,7 +26,15 @@ static_files = {
     "editor/editor.css": ("editor", "editor.css")
 }
 
-@app.route("/", defaults={'path': ''}, methods=["GET"])
+@app.route("/")
+def index():
+    token = request.cookies.get("token")
+
+    if token and users.get_token(token):
+        return redirect("/projects")
+    else:
+        return redirect("/login")
+
 @app.route("/<path:path>")
 def static_file(path):
     if path.endswith("/"):
@@ -36,6 +46,22 @@ def static_file(path):
     file_path, name = static_files[path]
     file_path = os.path.join("frontend", file_path)
     return send_from_directory(file_path, name)
+
+@app.route("/login/", methods=["POST"])
+def login():
+    if "username" not in request.form:
+        return redirect("/")
+    if "password" not in request.form:
+        return redirect("/")
+    if users.can_login(request.form["username"],
+            request.form["password"]):
+        token = users.add_token(request.form["username"])
+
+        r = redirect("/projects")
+        r.set_cookie("token", token, httponly=True, samesite="Strict", max_age=315360000)
+        return r
+    else:
+        return redirect("/")
 
 @app.route("/files/", defaults={'path': ''}, methods=["GET"])
 @app.route("/files/<path:path>", methods=["GET"])

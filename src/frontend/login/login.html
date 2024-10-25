@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>latex renderer</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="login.css">
+  <link rel="stylesheet" href="login/login.css">
 </head>
 <body>
     <div class="center-container">
@@ -13,9 +13,9 @@
             <h1>Login</h1>
             <form action="/login/" method="POST">
                 <label for="username">username</label><br>
-                <input id="username"><br>
+                <input id="username" name="username"><br>
                 <label for="password">password</label><br>
-                <input id="password" type="password"><br>
+                <input id="password" name="password" type="password"><br>
                 <input id="login" type="submit"
                     value="login" >
             </form>
