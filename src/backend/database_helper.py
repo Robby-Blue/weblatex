@@ -40,7 +40,7 @@ class DatabaseHelper:
 
     def setup(self):
         self.execute("""
-CREATE TABLE IF NOT EXISTS Users (
+CREATE TABLE IF NOT EXISTS Users(
     username VARCHAR(20) NOT NULL UNIQUE,
     password_hash BINARY(60) NOT NULL,
     PRIMARY KEY (username)
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS Users (
 """)
 
         self.execute("""
-CREATE TABLE IF NOT EXISTS Tokens (
+CREATE TABLE IF NOT EXISTS Tokens(
     token VARCHAR(50) NOT NULL,
     username VARCHAR(20) NOT NULL,
     FOREIGN KEY (username) REFERENCES Users(username)
@@ -56,11 +56,12 @@ CREATE TABLE IF NOT EXISTS Tokens (
 """)
         
         self.execute("""
-CREATE TABLE IF NOT EXISTS Projects (
+CREATE TABLE IF NOT EXISTS Projects(
     path VARCHAR(50) NOT NULL,
     is_folder BOOL NOT NULL,
-    parent_path VARCHAR(50) NOT NULL,
+    parent_path VARCHAR(50),
     creator VARCHAR(20) NOT NULL,
+    PRIMARY KEY (path),
     FOREIGN KEY (parent_path) REFERENCES Projects(path),
     FOREIGN KEY (creator) REFERENCES Users(username)
 )

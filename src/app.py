@@ -6,6 +6,7 @@ import mimetypes
 
 from backend import docker
 from backend import users
+from backend import projects
 
 docker.init()
 
@@ -102,6 +103,17 @@ def static_file(path):
     return Response(response=found["content"],
         mimetype=found["mimetype"])
 
+@app.route("/api/projects/")
+def projects_list_api():
+    if "path" not in request.args:
+        return Response(status=400)
+    path = request.args["path"]
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    return projects.get_projects(user["username"], path)
+
 @app.route("/login/", methods=["POST"])
 def login():
     if "username" not in request.form:
@@ -118,10 +130,21 @@ def login():
     else:
         return redirect("/")
 
-@app.route("/files/", defaults={'path': ''}, methods=["GET"])
-@app.route("/files/<path:path>", methods=["GET"])
-def get_files(path):
-    fs_path = get_rel_path("compiler_workspace", path)
+@app.route("/api/projects/files/")
+def get_files():
+    if "project" not in request.args:
+        return Response(status=400)
+    if "path" not in request.args:
+        return Response(status=400)
+    project = request.args["project"]
+    path = request.args["path"]
+
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+
+    fs_path = get_fs_path(user, project, path)
 
     if not fs_path:
         return "bad path", 400
@@ -143,13 +166,24 @@ def get_files(path):
             })
         return files 
 
-@app.route("/files/<path:path>", methods=["POST"])
-def upload_files(path):
+@app.route("/api/projects/files/", methods=["POST"])
+def upload_files():
     data = request.json
     if "text" not in data:
         return Response(status=400)
-    
-    fs_path = get_rel_path("compiler_workspace", path)
+    if "project" not in data:
+        return Response(status=400)
+    if "path" not in data:
+        return Response(status=400)
+    project = data["project"]
+    path = data["path"]
+
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+
+    fs_path = get_fs_path(user, project, path)
 
     if not fs_path:
         return "bad path", 400
@@ -163,6 +197,15 @@ def upload_files(path):
         f.write(text)
     return Response(status=200)
 
+def get_fs_path(user, project, file_path):
+    user_path = get_rel_path("compiler_workspace", user["username"])
+    if not user_path:
+        return None
+    project_path = get_rel_path(user_path, project)
+    if not project_path:
+        return None
+    return get_rel_path(project_path, file_path)
+
 @app.route("/pdf/compile", methods=["POST"])
 def compile_pdf():
     sid = sockets["main"]
@@ -172,7 +215,7 @@ def compile_pdf():
     return jsonify({
         "return_code": return_code,
         "log": log
-    }), 200 if return_code == 0 else 403
+    }), 200 if return_code == 0 else 401
 
 @socketio.on('connect')
 def handle_connect():
