@@ -13,6 +13,9 @@ async function listFiles(path) {
   let projectsListDiv = document.getElementById("project-list")
   for(let project of data) {
     let nameStartIndex = project.parent_path.length+1
+    if(project.parent_path.length == 0){
+        nameStartIndex = 0
+    }
     let projectName = project.path.substring(nameStartIndex)
 
     if(project.is_folder) {

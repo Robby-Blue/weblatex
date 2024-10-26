@@ -2,6 +2,10 @@ import * as pdf from "/editor/pdf-viewer.js";
 import * as editor from "/editor/code-editor.js";
 import * as fs from "/editor/file-system.js";
 
+let pathName = window.location.pathname;
+let projectPath = pathName.substring("/editor/".length)
+let sid = undefined
+
 let compileButton = document.getElementById("compile-button")
 
 function button(id, cb) {
@@ -12,7 +16,9 @@ function button(id, cb) {
 pdf.renderPDF();
 
 async function updatePDF() {
-  let res = await fetch("/pdf/compile", {
+  let data = {sid: sid}
+  let queryString = new URLSearchParams(data).toString();
+  let res = await fetch(`/api/projects/compile?${queryString}`, {
     method: "POST",
   });
   if (res.status != 200) return;
@@ -34,11 +40,6 @@ editor.onInput((src) => {
   }, 1000);
 });
 
-let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
-let socketUrl = socketProtocol + location.host;
-
-let socket = io.connect(socketUrl);
-
 button("compile-button", async (event) => {
   compileButton.classList.add("red")
   if (uploadTimeoutId) {
@@ -50,3 +51,12 @@ button("compile-button", async (event) => {
   // then make a function to sync all
   updatePDF();
 });
+
+let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
+let socketUrl = socketProtocol + location.host;
+
+let socket = io.connect(socketUrl);
+socket.emit("start", {project: projectPath})
+socket.on("sid", (data) => {
+  sid = data.sid
+})

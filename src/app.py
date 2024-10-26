@@ -1,5 +1,5 @@
-from flask import Flask, send_from_directory, Response, request, jsonify, redirect
-from flask_socketio import SocketIO
+from flask import Flask, Response, send_from_directory, request, jsonify, redirect
+from flask_socketio import SocketIO, emit
 import os
 import signal
 import mimetypes
@@ -9,8 +9,6 @@ from backend import users
 from backend import projects
 
 docker.init()
-
-sockets = {}
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
@@ -143,6 +141,8 @@ def get_files():
     user = users.get_token(token)
     if not user:
         return Response(status=401)
+    if not projects.get_project(user["username"], project):
+        return Response(status=401)
 
     fs_path = get_fs_path(user, project, path)
 
@@ -182,6 +182,8 @@ def upload_files():
     user = users.get_token(token)
     if not user:
         return Response(status=401)
+    if not projects.get_project(user["username"], project):
+        return Response(status=401)
 
     fs_path = get_fs_path(user, project, path)
 
@@ -206,24 +208,34 @@ def get_fs_path(user, project, file_path):
         return None
     return get_rel_path(project_path, file_path)
 
-@app.route("/pdf/compile", methods=["POST"])
+@app.route("/api/projects/compile", methods=["POST"])
 def compile_pdf():
-    sid = sockets["main"]
+    data = request.args
+    if "sid" not in data:
+        return Response(status=400)
+    sid = data["sid"]
 
     return_code, log = docker.compile_latex(sid)
 
     return jsonify({
         "return_code": return_code,
         "log": log
-    }), 200 if return_code == 0 else 401
+    }), 200 if return_code == 0 else 400
+
+@app.route("/api/projects/pdf/<path:project>")
+def get_project_pdf(project):
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    if not projects.get_project(user["username"], project):
+        return Response(status=401)
+    fs_path = get_fs_path(user, project, "")
+    return send_from_directory(fs_path, "main.pdf")
 
 @socketio.on('connect')
 def handle_connect():
-    if "main" in sockets:
-        return
-
-    docker.start_container(request.sid)
-    sockets["main"] = request.sid
+    pass
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -231,11 +243,28 @@ def handle_disconnect():
         return
     
     docker.kill_container(request.sid)
-    sockets.pop("main") 
 
-@socketio.on('message')
-def handle_message(data):
-    pass
+@socketio.on('start')
+def handle_message(message):
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return
+    username = user["username"]
+    if not projects.get_project(username,
+            message["project"]):
+        return
+
+    data_folder = "/var/lib/weblatex"
+    project = message["project"] 
+
+    project_path = os.path.join(data_folder, username, project)
+
+    success = docker.start_container(request.sid, project_path)
+    if not success:
+        return
+
+    emit("sid", {"sid": request.sid})
 
 def get_rel_path(folder, path):
     folder = os.path.abspath(folder)
