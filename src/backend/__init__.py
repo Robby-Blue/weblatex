@@ -6,3 +6,4 @@ db.connect()
 db.setup()
 
 import backend.users as users
+import backend.projects as projects

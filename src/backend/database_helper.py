@@ -55,6 +55,17 @@ CREATE TABLE IF NOT EXISTS Tokens (
 )
 """)
         
+        self.execute("""
+CREATE TABLE IF NOT EXISTS Projects (
+    path VARCHAR(50) NOT NULL,
+    is_folder BOOL NOT NULL,
+    parent_path VARCHAR(50) NOT NULL,
+    creator VARCHAR(20) NOT NULL,
+    FOREIGN KEY (parent_path) REFERENCES Projects(path),
+    FOREIGN KEY (creator) REFERENCES Users(username)
+)
+""")
+        
         if len(self.query(
 "SELECT * FROM Users LIMIT 1")) == 0:
             from backend import users

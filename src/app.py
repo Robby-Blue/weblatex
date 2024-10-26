@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory, Response, request, jsonify, redire
 from flask_socketio import SocketIO
 import os
 import signal
+import mimetypes
 
 from backend import docker
 from backend import users
@@ -13,18 +14,56 @@ sockets = {}
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
 
-static_files = {
-    "styles.css": ("", "styles.css"),
-    "login": ("login", "login.html"),
-    "login/login.css": ("login", "login.css"),
-    "editor": ("editor", "editor.html"),
-    "editor/script.js": ("editor/scripts", "script.js"),
-    "editor/pdf-viewer.js": ("editor/scripts", "pdf-viewer.js"),
-    "editor/code-editor.js": ("editor/scripts", "code-editor.js"),
-    "editor/file-system.js": ("editor/scripts", "file-system.js"),
-    "editor/latex-tokenizer.js": ("editor/scripts/tokenizers", "latex-tokenizer.js"),
-    "editor/editor.css": ("editor", "editor.css")
-}
+static_folders = [
+    {
+        "url_path": "/",
+        "files_path": ""
+    },
+    {
+        "url_path": "/login",
+        "files_path": "login"
+    },
+    {
+        "url_path": "/projects/*",
+        "files_path": "projects"
+    },
+    {
+        "url_path": "/editor/*",
+        "files_path": "editor"
+    },
+    {
+        "url_path": "/editor",
+        "files_path": "editor/scripts"
+    },
+    {
+        "url_path": "/editor",
+        "files_path": "editor/scripts/tokenizers"
+    }
+]
+
+static_files = []
+
+for folder in static_folders:
+    folder_path = os.path.join("frontend", folder["files_path"])
+
+    for file_name in os.listdir(folder_path):
+        url_path = folder["url_path"]
+        if not file_name.endswith(".html"):
+            url_path = url_path.removesuffix("/*")
+            url_path = os.path.join(url_path, file_name)
+        file_path = os.path.join(folder_path, file_name)
+
+        if not os.path.isfile(file_path):
+            continue
+
+        mimetype, _ = mimetypes.guess_type(file_name)
+
+        with open(file_path, "r") as f:
+            static_files.append({
+                "url_path": url_path,
+                "mimetype": mimetype,
+                "content": f.read()
+            })
 
 @app.route("/")
 def index():
@@ -39,13 +78,29 @@ def index():
 def static_file(path):
     if path.endswith("/"):
         path = path[:-1]
+    path = f"/{path}"
 
-    if path not in static_files:
-        return Response(status=404)
+    best_match = 0
+    found = None
+    for file in static_files:
+        matches_exact = path == file["url_path"]
+        allow_indirect = file["url_path"].endswith("/*")
+        matches_indirect = path.startswith(file["url_path"][:-2]) and allow_indirect
 
-    file_path, name = static_files[path]
-    file_path = os.path.join("frontend", file_path)
-    return send_from_directory(file_path, name)
+        match = 0
+        if matches_indirect:
+            match = 1
+        if matches_exact:
+            match = 2
+        if match > best_match:
+            best_match = match
+            found = file
+
+    if not found:
+        return Response("not found", status=404)
+
+    return Response(response=found["content"],
+        mimetype=found["mimetype"])
 
 @app.route("/login/", methods=["POST"])
 def login():
