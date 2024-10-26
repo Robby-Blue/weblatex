@@ -10,11 +10,16 @@ body {
 
 .folder-container {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    margin-bottom: 32px;
 }
 
 p {
     margin: 0;
+}
+
+a {
+	text-decoration: none;
 }
 
 button {

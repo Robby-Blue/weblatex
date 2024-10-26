@@ -30,10 +30,12 @@ def add_token(username):
     return token
 
 def get_token(token):
+    if not token:
+        return False
     r = db.query("SELECT * FROM Tokens WHERE token=%s", (token,))
     if len(r) == 0:
         return False
-    return r
+    return r[0]
 
 def generate_token():
     characters = string.ascii_letters + string.digits

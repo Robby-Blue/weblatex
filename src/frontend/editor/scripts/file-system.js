@@ -9,6 +9,9 @@ let fileCache = {};
 let filePickerElement = document.querySelector(".files-list");
 let currentPathElement = document.querySelector(".current-path-text");
 
+let pathName = window.location.pathname;
+let projectPath = pathName.substring("/editor/".length)
+
 currentPathElement.addEventListener("click", (event) => {
   if (currentFolderPath == ".") {
     return;
@@ -34,7 +37,9 @@ async function openFolder(path) {
   currentPathElement.innerText = pathText;
 
   let data = await getCached(folderCache, path, async () => {
-    let res = await fetch(`/files/${path}`);
+    let data = {path: path, project: projectPath}
+    let queryString = new URLSearchParams(data).toString();
+    let res = await fetch(`/api/projects/files?${queryString}`);
     return await res.json();
   });
 
@@ -57,7 +62,9 @@ async function openFolder(path) {
 async function openFile(path) {
   currentFilePath = path;
   let text = await getCached(fileCache, path, async () => {
-    let res = await fetch(`/files/${path}`);
+    let data = {path: path, project: projectPath}
+    let queryString = new URLSearchParams(data).toString();
+    let res = await fetch(`/api/projects/files?${queryString}`);
     return await res.text();
   });
   editor.updateSyntaxHighlight(text);
@@ -69,9 +76,14 @@ export async function updateCurrentFile(src) {
 }
 
 async function uploadCurrentFile() {
-  let res = await fetch(`/files/${currentFilePath}`, {
+  let res = await fetch(`/api/projects/files/`, {
     method: "POST",
-    body: JSON.stringify({ text: fileCache[currentFilePath] }),
+    body: JSON.stringify(
+      {
+        text: fileCache[currentFilePath],
+        project: projectPath,
+        path: currentFilePath
+      }),
     headers: {
       "Content-Type": "application/json",
     },
