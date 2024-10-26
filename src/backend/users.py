@@ -2,6 +2,7 @@ import bcrypt
 import secrets
 import string
 from backend import db
+from backend import projects
 
 def add_user(username, password):
     hashed = bcrypt.hashpw(password.encode("UTF-8"), bcrypt.gensalt())
@@ -9,6 +10,7 @@ def add_user(username, password):
     db.execute(
 "INSERT INTO Users (username, password_hash) VALUES (%s, %s)",
 (username, hashed))
+    projects.add_project(username, "", True)
 
 def can_login(username, password):
     r = db.query("SELECT * FROM Users WHERE username=%s", (username,))

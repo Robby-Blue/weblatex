@@ -1,0 +1,23 @@
+body {
+    overflow: hidden;
+}
+
+.center-container {
+    margin: auto;
+    width: 50%;
+    margin-top: 128px;
+}
+
+.folder-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+p {
+    margin: 0;
+}
+
+button {
+    border: none;
+    border-radius: 5px;
+}
