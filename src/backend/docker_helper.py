@@ -32,8 +32,11 @@ def build_image():
         rm=True
     )
 
-def start_container(sid):
-    path = os.path.realpath("/var/lib/weblatex")
+def start_container(sid, project_path):
+    if sid in containers:
+        return False
+
+    path = os.path.realpath(project_path)
 
     container = docker_client.containers.run(image_name, detach=True, tty=True,
         volumes={
@@ -48,6 +51,7 @@ def start_container(sid):
     # this hopefully makes it secure enough
 
     containers[sid] = container
+    return True
 
 def has_container(sid):
     return sid in containers

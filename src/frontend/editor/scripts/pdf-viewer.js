@@ -5,6 +5,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 const pdfjsWorker = new pdfjsLib.PDFWorker();
 
+let pathName = window.location.pathname;
+let projectPath = pathName.substring("/editor/".length)
+
 async function renderPage(page, canvas, parentWidth) {
   let canvasContext = canvas.getContext("2d");
 
@@ -24,7 +27,7 @@ async function renderPage(page, canvas, parentWidth) {
 export function renderPDF() {
   pdfjsLib
     .getDocument({
-      url: "/pdf/",
+      url: `/api/projects/pdf/${projectPath}`,
       worker: pdfjsWorker,
     })
     .promise.then(async (pdf) => {
