@@ -1,5 +1,6 @@
 import * as fs from "/editor/file-system.js";
 import * as latex_tokenizer from "/editor/latex-tokenizer.js";
+import * as shortcuts from "/editor/shortcuts.js";
 
 let tokenizers = {
   ".tex": latex_tokenizer.tokenize,
@@ -8,6 +9,8 @@ let tokenizers = {
 let editorDiv = document.getElementById("editor");
 let input_cb = null;
 let lastKey = null;
+
+let selectionAbsOffset;
 
 function htmlEncode(text) {
   return text
@@ -241,6 +244,10 @@ export function onInput(cb) {
   input_cb = cb;
 }
 
+editorDiv.addEventListener("focusout", () => {
+  selectionAbsOffset = getAbsoluteCaretPosition(editorDiv);
+});
+
 editorDiv.addEventListener("keydown", (event) => {
   lastKey = event.key;
 });
@@ -275,4 +282,24 @@ editorDiv.addEventListener("paste", function (event) {
   }
 
   return src;
+});
+
+let shortcutField = document.getElementById("shortcut-field");
+
+shortcutField.addEventListener("focusout", (event) => {
+  shortcutField.value = "";
+});
+
+shortcutField.addEventListener("keypress", (event) => {
+  if (event.key === "Enter") {
+    let src = getSrcText();
+
+    let newSrc = shortcuts.executeShortcut(shortcutField.value, src, selectionAbsOffset);
+    if (!newSrc) {
+      return;
+    }
+
+    shortcutField.value = "";
+    updateSyntaxHighlight(newSrc);
+  }
 });
