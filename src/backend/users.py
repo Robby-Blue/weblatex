@@ -17,8 +17,7 @@ def can_login(username, password):
     if len(r) == 0:
         return False
     hashed = r[0]["password_hash"]
-    a = bcrypt.checkpw(password.encode("UTF-8"), bytes(hashed))
-    return a
+    return bcrypt.checkpw(password.encode("UTF-8"), bytes(hashed))
 
 def add_token(username):
     token = generate_token()
