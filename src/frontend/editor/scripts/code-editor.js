@@ -278,7 +278,7 @@ editorDiv.addEventListener("paste", function (event) {
 
   selectedDiv = editorDiv.childNodes[selectedDivIndex];
   if (selectedDiv) {
-    setCaretPosition(offset, selectedDiv);
+    setCaretPosition(offset + pastedText.length, selectedDiv);
   }
 
   return src;
