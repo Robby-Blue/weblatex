@@ -285,7 +285,7 @@ editorDiv.addEventListener("paste", function (event) {
     setCaretPosition(offset + pastedText.length, selectedDiv);
   }
 
-  return src;
+  input_cb(newSrc);
 });
 
 shortcutField.addEventListener("focusout", (event) => {
@@ -303,5 +303,6 @@ shortcutField.addEventListener("keypress", (event) => {
 
     shortcutField.value = "";
     updateSyntaxHighlight(newSrc);
+    input_cb(newSrc);
   }
 });
