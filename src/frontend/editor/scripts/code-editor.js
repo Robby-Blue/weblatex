@@ -7,6 +7,7 @@ let tokenizers = {
 };
 
 let editorDiv = document.getElementById("editor");
+let shortcutField = document.getElementById("shortcut-field");
 let input_cb = null;
 let lastKey = null;
 
@@ -250,6 +251,9 @@ editorDiv.addEventListener("focusout", () => {
 
 editorDiv.addEventListener("keydown", (event) => {
   lastKey = event.key;
+  if (event.ctrlKey && event.code === "Space") {
+    shortcutField.focus()
+  }
 });
 
 editorDiv.addEventListener("input", () => {
@@ -283,8 +287,6 @@ editorDiv.addEventListener("paste", function (event) {
 
   return src;
 });
-
-let shortcutField = document.getElementById("shortcut-field");
 
 shortcutField.addEventListener("focusout", (event) => {
   shortcutField.value = "";
