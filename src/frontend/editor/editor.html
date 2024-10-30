@@ -11,6 +11,10 @@
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <body>
+  <div class="shortcuts-popup" id="shortcuts-popup">
+    <input id="shortcut-field" class="shortcut-field full" type="text" placeholder="shortcut">
+    <div class="shortcuts-content" id="shortcuts-content"></div>
+  </div>
   <div class="container">
     <div class="file-picker">
       <p class="current-path-text"></p>
@@ -20,7 +24,7 @@
     <div class="code-container">
       <div class="code-header">
         <button>Settings</button>
-        <input id="shortcut-field" type="text" placeholder="shortcut">
+        <input id="open-shortcut-field" class="shortcut-field" type="text" placeholder="shortcut">
         <button id="compile-button">Compile</button>
       </div>
       <pre><div id="editor" spellcheck="false" contenteditable="true"></div></pre>

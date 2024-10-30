@@ -1,3 +1,14 @@
+let shortcutsPopup = document.getElementById("shortcuts-popup")
+let shortcutsContent = document.getElementById("shortcuts-content")
+let openShortcutField = document.getElementById("open-shortcut-field");
+let shortcutField = document.getElementById("shortcut-field");
+
+let executeShortcut_cb;
+
+export function onShortcut(cb) {
+  executeShortcut_cb = cb
+}
+
 function table(src, pos) {
   let text = `
 \\begin{center}
@@ -51,14 +62,73 @@ function removeText(src, pos, chars) {
   return srcStart + srcEnd;
 }
 
-let shortcuts = {
-  table: table,
-  toggledarkmode: toggledarkmode,
-};
-
-export function executeShortcut(shortcut, src, pos) {
-  if (!shortcuts.hasOwnProperty(shortcut)) {
-    return;
+let shortcuts = [
+  {
+    "name": "table",
+    "description": "create a table",
+    "func": table
+  },
+  {
+    "name": "toggledarkmode",
+    "description": "toggle darkmode",
+    "func": toggledarkmode
   }
-  return shortcuts[shortcut](src, pos);
+]
+
+function searchShortcuts(query) {
+  if(query == ""){
+    return shortcuts
+  }
+  return shortcuts.filter(s => s.name == query)
 }
+
+function showShortcuts(query) {
+  shortcutsContent.innerHTML = ""
+
+  let shownShortcuts = searchShortcuts(query)
+  for(let shortcut of shownShortcuts) {
+    let shortcutDiv = document.createElement("div")
+    shortcutDiv.classList.add("shortcut")
+
+    let shortcutName = document.createElement("p")
+    shortcutName.innerText = shortcut.name
+    shortcutDiv.appendChild(shortcutName)
+
+    let shortcutDescription = document.createElement("p")
+    shortcutDescription.innerText = shortcut.description
+    shortcutDiv.appendChild(shortcutDescription)
+
+    shortcutsContent.appendChild(shortcutDiv)
+  }
+}
+
+openShortcutField.addEventListener("focusin", (event) => {
+  shortcutField.value = "";
+  shortcutsPopup.classList.add("visible")
+  shortcutField.focus()
+  showShortcuts("")
+});
+
+shortcutField.addEventListener("focusout", (event) => {
+  shortcutField.value = "";
+  shortcutsPopup.classList.remove("visible")
+});
+
+shortcutField.addEventListener("keyup", (event) => {
+  if (event.key === "Escape") {
+    shortcutsPopup.classList.remove("visible")
+  }
+  if (event.key === "Enter") {
+    let results = searchShortcuts(shortcutField.value);
+    if (!results) {
+      return;
+    }
+    let shortcutFunc = results[0].func
+
+    executeShortcut_cb(shortcutFunc)
+    shortcutField.value = "";
+    shortcutsPopup.classList.remove("visible")
+  }
+
+  showShortcuts(event.target.value)
+});
