@@ -48,7 +48,8 @@ button.red {
     justify-content: space-between;
 }
 
-#shortcut-field {
+.shortcut-field {
+    width: 50%;
     background-color: rgb(20, 20, 20);
     color: white;
     outline: none;
@@ -56,6 +57,36 @@ button.red {
     border-radius: 8px;
     padding: 4px;
     margin-top: 4px;
+    box-sizing: border-box;
+}
+
+.shortcut-field.full {
+    width: 100%;
+}
+
+.shortcuts-popup {
+    visibility: hidden;
+    position: absolute;
+    user-select: none;
+    background-color: #1f1f1f;
+    border-radius: 16px;
+    padding: 16px;
+    width: 50%;
+    height: 50%;
+    inset: 0;
+    margin: auto;
+
+    .shortcut {
+        padding-top: 16px;
+    }
+}
+
+.shortcuts-content {
+    overflow: hidden;
+}
+
+.shortcuts-popup.visible {
+    visibility: visible;
 }
 
 .code-container {

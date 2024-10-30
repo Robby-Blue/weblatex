@@ -7,7 +7,6 @@ let tokenizers = {
 };
 
 let editorDiv = document.getElementById("editor");
-let shortcutField = document.getElementById("shortcut-field");
 let input_cb = null;
 let lastKey = null;
 
@@ -252,7 +251,8 @@ editorDiv.addEventListener("focusout", () => {
 editorDiv.addEventListener("keydown", (event) => {
   lastKey = event.key;
   if (event.ctrlKey && event.code === "Space") {
-    shortcutField.focus()
+    let openShortcutField = document.getElementById("open-shortcut-field");
+    openShortcutField.focus()
   }
 });
 
@@ -288,21 +288,9 @@ editorDiv.addEventListener("paste", function (event) {
   input_cb(newSrc);
 });
 
-shortcutField.addEventListener("focusout", (event) => {
-  shortcutField.value = "";
-});
-
-shortcutField.addEventListener("keypress", (event) => {
-  if (event.key === "Enter") {
-    let src = getSrcText();
-
-    let newSrc = shortcuts.executeShortcut(shortcutField.value, src, selectionAbsOffset);
-    if (!newSrc) {
-      return;
-    }
-
-    shortcutField.value = "";
-    updateSyntaxHighlight(newSrc);
-    input_cb(newSrc);
-  }
-});
+shortcuts.onShortcut((shortcutFunc) => {
+  let src = getSrcText()
+  let newSrc = shortcutFunc(src, selectionAbsOffset)
+  updateSyntaxHighlight(newSrc)
+  input_cb(newSrc)
+})
