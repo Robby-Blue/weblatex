@@ -76,10 +76,19 @@ let shortcuts = [
 ]
 
 function searchShortcuts(query) {
-  if(query == ""){
-    return shortcuts
-  }
-  return shortcuts.filter(s => s.name == query)
+  return shortcuts
+    .map((shortcut) => {
+      let points = 0
+      for(let c of query) {
+        if(shortcut.name.charAt(points) == c){
+          points += 1
+        }
+      }
+      shortcut.points = points
+      return shortcut
+    })
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 10)
 }
 
 function showShortcuts(query) {
