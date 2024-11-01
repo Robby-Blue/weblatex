@@ -252,7 +252,7 @@ editorDiv.addEventListener("keydown", (event) => {
   lastKey = event.key;
   if (event.ctrlKey && event.code === "Space") {
     let openShortcutField = document.getElementById("open-shortcut-field");
-    openShortcutField.focus()
+    openShortcutField.focus();
   }
 });
 
@@ -288,9 +288,11 @@ editorDiv.addEventListener("paste", function (event) {
   input_cb(newSrc);
 });
 
-shortcuts.onShortcut((shortcutFunc) => {
-  let src = getSrcText()
-  let newSrc = shortcutFunc(src, selectionAbsOffset)
-  updateSyntaxHighlight(newSrc)
-  input_cb(newSrc)
-})
+shortcuts.onShortcut((shortcutFunc, kwargs) => {
+  if (selectionAbsOffset == undefined) return;
+  let src = getSrcText();
+  let newSrc = shortcutFunc(src, selectionAbsOffset, kwargs);
+  if (!newSrc) return;
+  updateSyntaxHighlight(newSrc);
+  input_cb(newSrc);
+});
