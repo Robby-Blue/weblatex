@@ -16,9 +16,7 @@ function table(src, pos, kwargs) {
 
   let headerCols = "c|".repeat(kwargs.width);
   let tableCols = "v & ".repeat(kwargs.width).slice(0, -2);
-  let tableRow = ` ${tableCols}\\\\  
-\\hline
-`;
+  let tableRow = ` ${tableCols}\\\\\n\\hline\n`;
   let tableRows = tableRow.repeat(kwargs.height);
 
   let text = `
@@ -32,12 +30,31 @@ ${tableRows}
   return insertText(src, pos, text);
 }
 
-function toggledarkmode(src, _, _2) {
-  if (!src.includes("\\usepackage{darkmode}")) {
-    let docPos = src.indexOf("documentclass");
-    let startPos = src.indexOf("\n", docPos) + 1;
-    src = insertText(src, startPos, "\\usepackage{darkmode}\n");
+function matrix(src, pos, kwargs) {
+  // TODO: add kwargs to allow other
+  // kinda of matrices like pmatrix too
+  if (kwargs.width < 0 || kwargs.height < 0) {
+    return false;
   }
+
+  let tableCols = "v & ".repeat(kwargs.width).slice(0, -2);
+  let tableRow = ` ${tableCols}\\\\\n`;
+  let tableRows = tableRow.repeat(kwargs.height);
+
+  let text = `
+\\[
+\\begin{bmatrix}
+${tableRows}
+\\end{bmatrix}
+\\]`;
+
+  src = insertText(src, pos, text);
+  src = addPackage("amsmath", src);
+  return src;
+}
+
+function toggledarkmode(src, _, _2) {
+  src = addPackage("darkmode", src);
   if (!src.includes("\\enabledarkmode")) {
     let docPos = src.indexOf("usepackage{darkmode}");
     let startPos = src.indexOf("\n", docPos) + 1;
@@ -54,6 +71,15 @@ function toggledarkmode(src, _, _2) {
     src = removeText(src, commentPos, 1);
   } else {
     src = insertText(src, newlinePos + 1, "%");
+  }
+  return src;
+}
+
+function addPackage(packageName, src) {
+  if (!src.includes(`\\usepackage{${packageName}}`)) {
+    let docPos = src.indexOf("documentclass");
+    let startPos = src.indexOf("\n", docPos) + 1;
+    src = insertText(src, startPos, `\\usepackage{${packageName}}\n`);
   }
   return src;
 }
@@ -85,6 +111,21 @@ let shortcuts = [
       },
     ],
     func: table,
+  },
+  {
+    name: "matrix",
+    description: "create a <width> by <height> matrix",
+    arguments: [
+      {
+        name: "width",
+        default: 2,
+      },
+      {
+        name: "height",
+        default: 2,
+      },
+    ],
+    func: matrix,
   },
   {
     name: "toggledarkmode",
