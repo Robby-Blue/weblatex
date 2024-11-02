@@ -19,6 +19,13 @@ def can_login(username, password):
     hashed = r[0]["password_hash"]
     return bcrypt.checkpw(password.encode("UTF-8"), bytes(hashed))
 
+def change_password(username, password):
+    hashed = bcrypt.hashpw(password.encode("UTF-8"), bcrypt.gensalt())
+
+    db.execute(
+"UPDATE Users SET password_hash=%s WHERE username=%s",
+(hashed, username))
+
 def add_token(username):
     token = generate_token()
         
