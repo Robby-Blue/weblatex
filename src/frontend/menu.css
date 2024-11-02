@@ -3,11 +3,13 @@ body {
 }
 
 .center-container {
-    margin: auto;
+    padding-top: 128px;
+    margin-inline: auto;
     width: 50%;
-    height: 100vh;
-    display: flex;
-    align-items: center;
+}
+
+h1 {
+    padding-bottom: 32px;
 }
 
 input {

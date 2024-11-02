@@ -37,6 +37,10 @@ static_folders = [
     {
         "url_path": "/editor",
         "files_path": "editor/scripts/tokenizers"
+    },
+    {
+        "url_path": "/change-password",
+        "files_path": "change-password"
     }
 ]
 
@@ -115,9 +119,9 @@ def projects_list_api():
 @app.route("/login/", methods=["POST"])
 def login():
     if "username" not in request.form:
-        return redirect("/")
+        return Response(status=400)
     if "password" not in request.form:
-        return redirect("/")
+        return Response(status=400)
     if users.can_login(request.form["username"],
             request.form["password"]):
         token = users.add_token(request.form["username"])
@@ -127,6 +131,17 @@ def login():
         return r
     else:
         return redirect("/")
+    
+@app.route("/change-password/", methods=["POST"])
+def change_password():
+    if "password" not in request.form:
+        return Response(status=400)
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    users.change_password(user["username"], request.form["password"])
+    return redirect("/")
 
 @app.route("/api/projects/files/")
 def get_files():
