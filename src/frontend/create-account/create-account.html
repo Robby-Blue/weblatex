@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>change password</title>
+  <title>create account</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/menu.css">
 </head>
 <body>
     <div class="center-container">
         <div>
-            <h1>change password</h1>
-            <form action="/change-password/" method="POST">
-                <label for="password">new password</label><br>
+            <h1>create account</h1>
+            <form action="/create-account/" method="POST">
+                <label for="username">username</label><br>
+                <input id="username" name="username" type="username"><br>
+                <label for="password">password</label><br>
                 <input id="password" name="password" type="password"><br>
                 <input type="submit"
-                    value="change password" >
+                    value="create account">
             </form>
         </div>
     </div>
