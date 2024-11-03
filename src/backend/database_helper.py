@@ -43,6 +43,7 @@ class DatabaseHelper:
 CREATE TABLE IF NOT EXISTS Users(
     username VARCHAR(20) NOT NULL UNIQUE,
     password_hash BINARY(60) NOT NULL,
+    is_admin BOOL NOT NULL,
     PRIMARY KEY (username)
 )
 """)
@@ -61,8 +62,6 @@ CREATE TABLE IF NOT EXISTS Projects(
     is_folder BOOL NOT NULL,
     parent_path VARCHAR(50),
     creator VARCHAR(20) NOT NULL,
-    PRIMARY KEY (path),
-    FOREIGN KEY (parent_path) REFERENCES Projects(path),
     FOREIGN KEY (creator) REFERENCES Users(username)
 )
 """)
@@ -70,4 +69,4 @@ CREATE TABLE IF NOT EXISTS Projects(
         if len(self.query(
 "SELECT * FROM Users LIMIT 1")) == 0:
             from backend import users
-            users.add_user("admin", "admin")
+            users.add_user("admin", "admin", is_admin=True)

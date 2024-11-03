@@ -4,12 +4,12 @@ import string
 from backend import db
 from backend import projects
 
-def add_user(username, password):
+def add_user(username, password, is_admin=False):
     hashed = bcrypt.hashpw(password.encode("UTF-8"), bcrypt.gensalt())
 
     db.execute(
-"INSERT INTO Users (username, password_hash) VALUES (%s, %s)",
-(username, hashed))
+"INSERT INTO Users (username, password_hash, is_admin) VALUES (%s, %s, %s)",
+(username, hashed, is_admin))
     projects.add_project(username, "", True)
 
 def can_login(username, password):
@@ -25,6 +25,12 @@ def change_password(username, password):
     db.execute(
 "UPDATE Users SET password_hash=%s WHERE username=%s",
 (hashed, username))
+    
+def get_user(username):
+    r = db.query("SELECT * FROM Users WHERE username=%s", (username,))
+    if len(r) == 0:
+        return False
+    return r[0]
 
 def add_token(username):
     token = generate_token()

@@ -41,6 +41,10 @@ static_folders = [
     {
         "url_path": "/change-password",
         "files_path": "change-password"
+    },
+    {
+        "url_path": "/create-account",
+        "files_path": "create-account"
     }
 ]
 
@@ -141,6 +145,24 @@ def change_password():
     if not user:
         return Response(status=401)
     users.change_password(user["username"], request.form["password"])
+    return redirect("/")
+
+@app.route("/create-account/", methods=["POST"])
+def create_account():
+    if "username" not in request.form:
+        return Response(status=400)
+    if "password" not in request.form:
+        return Response(status=400)
+    token = request.cookies.get("token", None)
+    token_user = users.get_token(token)
+    if not token_user:
+        return Response(status=401)
+    user = users.get_user(token_user["username"])
+    if not user["is_admin"]:
+        return Response(status=401)
+    if users.get_user(request.form["username"]):
+        return Response("user already exists")
+    users.add_user(request.form["username"], request.form["password"])
     return redirect("/")
 
 @app.route("/api/projects/files/")
