@@ -45,6 +45,10 @@ static_folders = [
     {
         "url_path": "/create-account",
         "files_path": "create-account"
+    },
+    {
+        "url_path": "/invalidate-tokens",
+        "files_path": "invalidate-tokens"
     }
 ]
 
@@ -146,6 +150,19 @@ def change_password():
         return Response(status=401)
     users.change_password(user["username"], request.form["password"])
     return redirect("/")
+
+@app.route("/invalidate-tokens/", methods=["POST"])
+def invalidate_tokens():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    users.invalidate_tokens(user["username"])
+    new_token = users.add_token(user["username"])
+
+    r = redirect("/projects")
+    r.set_cookie("token", new_token, httponly=True, samesite="Strict", max_age=315360000)
+    return r
 
 @app.route("/create-account/", methods=["POST"])
 def create_account():

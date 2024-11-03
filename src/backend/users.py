@@ -41,6 +41,10 @@ def add_token(username):
     
     return token
 
+def invalidate_tokens(username):
+    db.execute("DELETE FROM Tokens WHERE username=%s",
+        (username,))
+
 def get_token(token):
     if not token:
         return False
