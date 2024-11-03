@@ -49,6 +49,17 @@ def get_token(token):
         return False
     return r[0]
 
+def get_user_from_token(token):
+    if not token:
+        return False
+    r = db.query("""SELECT Users.* FROM Tokens
+INNER JOIN Users ON Tokens.username=Users.username
+WHERE token=%s;""",
+(token,))
+    if len(r) == 0:
+        return False
+    return r[0]
+
 def generate_token():
     characters = string.ascii_letters + string.digits
     token = ''.join(secrets.choice(characters) for _ in range(50))

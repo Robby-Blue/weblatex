@@ -154,11 +154,8 @@ def create_account():
     if "password" not in request.form:
         return Response(status=400)
     token = request.cookies.get("token", None)
-    token_user = users.get_token(token)
-    if not token_user:
-        return Response(status=401)
-    user = users.get_user(token_user["username"])
-    if not user["is_admin"]:
+    user = users.get_user_from_token(token)
+    if not user or not user["is_admin"]:
         return Response(status=401)
     if users.get_user(request.form["username"]):
         return Response("user already exists")
