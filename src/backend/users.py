@@ -10,7 +10,7 @@ def add_user(username, password, is_admin=False):
     db.execute(
 "INSERT INTO Users (username, password_hash, is_admin) VALUES (%s, %s, %s)",
 (username, hashed, is_admin))
-    projects.add_project(username, "", True)
+    projects.add_project(username, None, "", True)
 
 def can_login(username, password):
     r = db.query("SELECT * FROM Users WHERE username=%s", (username,))

@@ -122,6 +122,9 @@ def projects_list_api():
     user = users.get_token(token)
     if not user:
         return Response(status=401)
+    project = projects.get_project(user["username"], path, is_folder=True)
+    if not project:
+        return Response(status=400)
     return projects.get_projects(user["username"], path)
 
 @app.route("/login/", methods=["POST"])
@@ -179,6 +182,36 @@ def create_account():
     users.add_user(request.form["username"], request.form["password"])
     return redirect("/")
 
+@app.route("/project/new/", methods=["POST"])
+def new_project():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    username = user["username"]
+
+    if "name" not in request.form:
+        return Response(status=400)
+    if "parent" not in request.form:
+        return Response(status=400)
+    if "type" not in request.form:
+        return Response(status=400)
+    if request.form["type"] != "project" and request.form["type"] != "folder":
+        return Response(status=400)
+
+    name = request.form["name"]
+    parent = request.form["parent"]
+
+    is_folder = request.form["type"] == "folder"
+
+    success = projects.add_project(username, parent, name, is_folder)
+    if not success:
+        return Response(status=400)
+
+    full_path = os.path.join(parent, name) 
+    first_path = "/projects" if is_folder else "/editor"
+    return redirect(os.path.join(first_path, full_path))
+
 @app.route("/api/projects/files/")
 def get_files():
     if "project" not in request.args:
@@ -192,10 +225,10 @@ def get_files():
     user = users.get_token(token)
     if not user:
         return Response(status=401)
-    if not projects.get_project(user["username"], project):
+    if not projects.get_project(user["username"], project, is_folder=False):
         return Response(status=401)
 
-    fs_path = get_fs_path(user, project, path)
+    fs_path = projects.get_fs_path(user["username"], project, path)
 
     if not fs_path:
         return "bad path", 400
@@ -233,10 +266,10 @@ def upload_files():
     user = users.get_token(token)
     if not user:
         return Response(status=401)
-    if not projects.get_project(user["username"], project):
+    if not projects.get_project(user["username"], project, is_folder=False):
         return Response(status=401)
 
-    fs_path = get_fs_path(user, project, path)
+    fs_path = projects.get_fs_path(user["username"], project, path)
 
     if not fs_path:
         return "bad path", 400
@@ -249,15 +282,6 @@ def upload_files():
     with open(fs_path, "w") as f:
         f.write(text)
     return Response(status=200)
-
-def get_fs_path(user, project, file_path):
-    user_path = get_rel_path("compiler_workspace", user["username"])
-    if not user_path:
-        return None
-    project_path = get_rel_path(user_path, project)
-    if not project_path:
-        return None
-    return get_rel_path(project_path, file_path)
 
 @app.route("/api/projects/compile", methods=["POST"])
 def compile_pdf():
@@ -279,9 +303,9 @@ def get_project_pdf(project):
     user = users.get_token(token)
     if not user:
         return Response(status=401)
-    if not projects.get_project(user["username"], project):
+    if not projects.get_project(user["username"], project, is_folder=False):
         return Response(status=401)
-    fs_path = get_fs_path(user, project, "")
+    fs_path = projects.get_fs_path(user["username"], project, "")
     return send_from_directory(fs_path, "main.pdf")
 
 @socketio.on('connect')
@@ -303,7 +327,7 @@ def handle_message(message):
         return
     username = user["username"]
     if not projects.get_project(username,
-            message["project"]):
+            message["project"], is_folder=False):
         return
 
     data_folder = "/var/lib/weblatex"
@@ -316,14 +340,6 @@ def handle_message(message):
         return
 
     emit("sid", {"sid": request.sid})
-
-def get_rel_path(folder, path):
-    folder = os.path.abspath(folder)
-    fs_path = os.path.abspath(os.path.join(folder, path))
-
-    if not fs_path.startswith(folder):
-        return None
-    return fs_path
 
 def handle_sigterm(*args):
     socketio.stop()

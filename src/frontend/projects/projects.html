@@ -9,12 +9,21 @@
   <script src="/projects/projects.js/" defer></script>
 </head>
 <body>
+    <div class="name-popup" id="name-popup">
+        <h1 id="name-label">name</h1>
+        <form action="/project/new/" method="POST">
+            <input id="name-field" class="name-field full" type="text" placeholder="name" name="name">
+            <input id="parent-field" type="text" name="parent" class="invisible" />
+            <input id="type-field" type="text" name="type" class="invisible" />
+            <input type="submit" class="invisible" />
+        </form>
+    </div>
     <div class="center-container">
         <div class="folder-container">
             <p id="folder-label"></p>
             <div>
-                <button>new project</button>
-                <button>new folder</button>
+                <button onclick="onCreateClicked(false)">new project</button>
+                <button onclick="onCreateClicked(true)">new folder</button>
             </div>
         </div>
         <div id="project-list"></div>
