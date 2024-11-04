@@ -130,7 +130,8 @@ let shortcuts = [
   {
     name: "toggledarkmode",
     description: "toggle darkmode",
-    fun: toggledarkmode,
+    arguments: [],
+    func: toggledarkmode,
   },
 ];
 
