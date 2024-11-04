@@ -204,9 +204,9 @@ def new_project():
 
     is_folder = request.form["type"] == "folder"
 
-    success = projects.add_project(username, parent, name, is_folder)
+    success, error = projects.add_project(username, parent, name, is_folder)
     if not success:
-        return Response(status=400)
+        return Response(error, status=400)
 
     full_path = os.path.join(parent, name) 
     first_path = "/projects" if is_folder else "/editor"
@@ -225,62 +225,31 @@ def get_files():
     user = users.get_token(token)
     if not user:
         return Response(status=401)
-    if not projects.get_project(user["username"], project, is_folder=False):
-        return Response(status=401)
-
-    fs_path = projects.get_fs_path(user["username"], project, path)
-
-    if not fs_path:
-        return "bad path", 400
-    if not os.path.exists(fs_path):
-        return "file not found", 404
     
-    if os.path.isfile(fs_path):
-        with open(fs_path, "r") as f:
-            text = f.read()
-        return text
-    else:
-        files = []
-        for file_name in os.listdir(fs_path):
-            file_path = os.path.join(fs_path, file_name)
-
-            files.append({
-                "name": file_name,
-                "is_file": os.path.isfile(file_path)
-            })
-        return files 
+    value, error = projects.get_files(user["username"], project, path)
+    if error:
+        return Response(error, status=400)
+    return value
 
 @app.route("/api/projects/files/", methods=["POST"])
 def upload_files():
-    data = request.json
-    if "text" not in data:
+    if "text" not in request.json:
         return Response(status=400)
-    if "project" not in data:
+    if "project" not in request.json:
         return Response(status=400)
-    if "path" not in data:
+    if "path" not in request.json:
         return Response(status=400)
-    project = data["project"]
-    path = data["path"]
+    project = request.json["project"]
+    path = request.json["path"]
 
     token = request.cookies.get("token", None)
     user = users.get_token(token)
     if not user:
         return Response(status=401)
-    if not projects.get_project(user["username"], project, is_folder=False):
-        return Response(status=401)
-
-    fs_path = projects.get_fs_path(user["username"], project, path)
-
-    if not fs_path:
-        return "bad path", 400
-    if not os.path.exists(os.path.dirname(fs_path)):
-        return "bad parent", 400
-    if os.path.isdir(fs_path):
-        return "is folder", 400
-
-    text = data["text"]
-    with open(fs_path, "w") as f:
-        f.write(text)
+    
+    success, error = projects.upload_file(user["username"], project, path, request.json["text"])
+    if not success:
+        return Response(error, status=400)
     return Response(status=200)
 
 @app.route("/api/projects/compile", methods=["POST"])
