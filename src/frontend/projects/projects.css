@@ -26,3 +26,39 @@ button {
     border: none;
     border-radius: 5px;
 }
+
+.name-popup {
+    visibility: hidden;
+    position: absolute;
+    user-select: none;
+    background-color: #1f1f1f;
+    border-radius: 16px;
+    padding: 16px;
+    width: 50%;
+    height: fit-content;
+    inset: 0;
+    margin: auto;
+
+    > h1 {
+        margin: 0;
+    }
+
+    .invisible {
+        display: none;
+    }
+}
+
+.name-popup.visible {
+    visibility: visible;
+}
+
+.name-field {
+    background-color: rgb(20, 20, 20);
+    color: white;
+    outline: none;
+    border: none;
+    border-radius: 8px;
+    padding: 4px;
+    margin-top: 4px;
+    box-sizing: border-box;
+}
