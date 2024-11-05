@@ -89,12 +89,16 @@ export async function updateCurrentFile(src) {
 }
 
 async function uploadCurrentFile() {
+  return await uploadFile(currentFilePath, fileCache[currentFilePath]);
+}
+
+async function uploadFile(path, content) {
   let res = await fetch(`/api/projects/files/`, {
     method: "POST",
     body: JSON.stringify({
-      text: fileCache[currentFilePath],
+      text: content,
       project: projectPath,
-      path: currentFilePath,
+      path: path,
     }),
     headers: {
       "Content-Type": "application/json",
@@ -119,8 +123,8 @@ function showCreationMenu(isFile) {
       shortcutsPopup.classList.remove("visible");
     }
     if (event.key === "Enter") {
-      delete folderCache[currentFolderPath];
       let success = await createFile(nameField.value, isFile);
+      delete folderCache[currentFolderPath];
       if (success) {
         openFolder(currentFolderPath);
       }
@@ -155,6 +159,36 @@ document
   .addEventListener("click", (event) => {
     showCreationMenu(false);
   });
+
+document
+  .getElementById("upload-file-button")
+  .addEventListener("click", (event) => {
+    let uploadFileInput = document.createElement("input");
+    uploadFileInput.type = "file";
+    uploadFileInput.click();
+
+    uploadFileInput.addEventListener("change", uploadFileSelection);
+  });
+
+function uploadFileSelection(event) {
+  let file = event.target.files[0];
+  let path = currentFolderPath + "/" + file.name;
+  path = path.replace("//", "/");
+
+  let reader = new FileReader();
+
+  reader.addEventListener("load", async (event) => {
+    let content = event.target.result;
+
+    let success = await uploadFile(path, content);
+    delete folderCache[currentFolderPath];
+    if (success) {
+      openFolder(currentFolderPath);
+    }
+  });
+
+  reader.readAsText(file);
+}
 
 openFile(currentFilePath);
 openFolder(currentFolderPath);
