@@ -45,6 +45,18 @@ async function openFolder(path) {
 
   filePickerElement.innerHTML = "";
 
+  data.sort((a, b) => {
+    if (a.is_file === b.is_file) return 0;
+    return a.is_file ? 1 : -1;
+  });
+
+  data.sort((a, b) => {
+    if (a.is_file != b.is_file) {
+      return 0;
+    }
+    return a.name.localeCompare(b.name);
+  });
+
   for (let file of data) {
     let fileElement = document.createElement("p");
     fileElement.innerText = file.name + (file.is_file ? "" : "/");
