@@ -232,7 +232,7 @@ def get_files():
     return value
 
 @app.route("/api/projects/files/", methods=["POST"])
-def upload_files():
+def upload_file():
     if "text" not in request.json:
         return Response(status=400)
     if "project" not in request.json:
@@ -248,6 +248,31 @@ def upload_files():
         return Response(status=401)
     
     success, error = projects.upload_file(user["username"], project, path, request.json["text"])
+    if not success:
+        return Response(error, status=400)
+    return Response(status=200)
+
+@app.route("/api/projects/files/new", methods=["POST"])
+def create_file():
+    if "project" not in request.json:
+        return Response(status=400)
+    if "parentPath" not in request.json:
+        return Response(status=400)
+    if "isFile" not in request.json:
+        return Response(status=400)
+    if "name" not in request.json:
+        return Response(status=400)
+    project = request.json["project"]
+    parent_path = request.json["parentPath"]
+    name = request.json["name"]
+    is_file = request.json["isFile"]
+
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    
+    success, error = projects.create_file(user["username"], project, parent_path, name, is_file)
     if not success:
         return Response(error, status=400)
     return Response(status=200)

@@ -101,6 +101,27 @@ def upload_file(creator, project, path, content):
         f.write(content)
     return True, None
 
+def create_file(creator, project, parent_path, name, is_file):
+    if not get_project(creator, project, is_folder=False):
+        return False, "project not found"
+
+    parent_fs_path = get_fs_path(creator, project, parent_path)
+    fs_path = os.path.join(parent_fs_path, name)
+
+    if not fs_path:
+        return False, "bad path"
+    if not os.path.isdir(parent_fs_path):
+        return False, "bad parent"
+    if os.path.exists(fs_path):
+        return False, "already exists"
+
+    if is_file:
+        with open(fs_path, "w") as f:
+            pass
+    else:
+        os.mkdir(fs_path)
+    return True, None
+
 def get_fs_path(creator, project, file_path):
     user_path = get_rel_path("compiler_workspace", creator)
     if not user_path:
