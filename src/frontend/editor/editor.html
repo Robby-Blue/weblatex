@@ -11,7 +11,11 @@
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <body>
-  <div class="shortcuts-popup" id="shortcuts-popup">
+  <div class="context-menu" id="file-context-popup">
+    <button id="file-context-delete">delete</button>
+    <button id="file-context-rename">rename</button>
+  </div>
+  <div class="popup" id="shortcuts-popup">
     <input id="shortcut-field" class="shortcut-field full" type="text" placeholder="shortcut">
     <div class="shortcuts-content" id="shortcuts-content"></div>
   </div>
@@ -23,7 +27,9 @@
       </div>
       <div class="files-list"></div>
       <div>
-        <hr>
+      <hr>
+      </div>
+      <div class="files-controls">
         <button id="upload-file-button">upload file</button>
         <button id="create-file-button">new file</button>
         <button id="create-folder-button">new folder</button>

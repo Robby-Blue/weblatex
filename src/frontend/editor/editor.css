@@ -48,6 +48,12 @@ button.red {
     flex-grow: 1;
 }
 
+.files-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
 .name-field {
     background-color: rgb(0, 0, 0, 255);
     color: white;
@@ -81,7 +87,7 @@ button.red {
     width: 100%;
 }
 
-.shortcuts-popup {
+.popup {
     visibility: hidden;
     position: absolute;
     user-select: none;
@@ -98,11 +104,20 @@ button.red {
     }
 }
 
+.context-menu {
+    visibility: hidden;
+    position: absolute;
+    user-select: none;
+    background-color: #1f1f1f;
+    display: flex;
+    flex-direction: column;
+}
+
 .shortcuts-content {
     overflow: hidden;
 }
 
-.shortcuts-popup.visible {
+.visible {
     visibility: visible;
 }
 

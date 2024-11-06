@@ -68,7 +68,15 @@ async function openFolder(path) {
       fileElement.classList.add("folder-label");
       fileElement.addEventListener("click", () => openFolder(filePath));
     }
-    fileElement.onclick = filePickerElement.appendChild(fileElement);
+
+    fileElement.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      currentContextFile = file;
+      showFileContextMenu(event);
+      return false;
+    });
+
+    filePickerElement.appendChild(fileElement);
   }
 }
 
@@ -131,6 +139,41 @@ function showCreationMenu(isFile) {
     }
   });
 }
+
+let currentContextFile;
+let fileContextPopup = document.getElementById("file-context-popup");
+
+function showFileContextMenu(event) {
+  fileContextPopup.classList.add("visible");
+  fileContextPopup.style.left = event.clientX + "px";
+  fileContextPopup.style.top = event.clientY + "px";
+}
+
+document.addEventListener("click", (event) => {
+  if (fileContextPopup.contains(event.target)) {
+    return;
+  }
+  fileContextPopup.classList.remove("visible");
+});
+
+document
+  .getElementById("file-context-delete")
+  .addEventListener("click", async (event) => {
+    await fetch(`/api/projects/files/delete`, {
+      method: "POST",
+      body: JSON.stringify({
+        project: projectPath,
+        parentPath: currentFolderPath,
+        name: currentContextFile.name,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    fileContextPopup.classList.remove("visible");
+    delete folderCache[currentFolderPath];
+    openFolder(currentFolderPath);
+  });
 
 async function createFile(name, isFile) {
   let res = await fetch(`/api/projects/files/new`, {

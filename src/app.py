@@ -277,6 +277,28 @@ def create_file():
         return Response(error, status=400)
     return Response(status=200)
 
+@app.route("/api/projects/files/delete", methods=["POST"])
+def delete_file():
+    if "project" not in request.json:
+        return Response(status=400)
+    if "parentPath" not in request.json:
+        return Response(status=400)
+    if "name" not in request.json:
+        return Response(status=400)
+    project = request.json["project"]
+    parent_path = request.json["parentPath"]
+    name = request.json["name"]
+
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    
+    success, error = projects.delete_file(user["username"], project, parent_path, name)
+    if not success:
+        return Response(error, status=400)
+    return Response(status=200)
+
 @app.route("/api/projects/compile", methods=["POST"])
 def compile_pdf():
     data = request.args
