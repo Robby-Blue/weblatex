@@ -115,7 +115,7 @@ async function uploadFile(path, content) {
   return res.status == 200;
 }
 
-function showCreationMenu(isFile) {
+function showCreationMenu(isFile, cb) {
   let nameField = document.createElement("input");
   nameField.classList.add("name-field");
 
@@ -131,11 +131,7 @@ function showCreationMenu(isFile) {
       shortcutsPopup.classList.remove("visible");
     }
     if (event.key === "Enter") {
-      let success = await createFile(nameField.value, isFile);
-      delete folderCache[currentFolderPath];
-      if (success) {
-        openFolder(currentFolderPath);
-      }
+      cb(nameField.value, isFile);
     }
   });
 }
@@ -175,7 +171,30 @@ document
     openFolder(currentFolderPath);
   });
 
-async function createFile(name, isFile) {
+document
+  .getElementById("file-context-rename")
+  .addEventListener("click", async (event) => {
+    fileContextPopup.classList.remove("visible");
+    showCreationMenu(false, async (newName, _) => {
+      await fetch(`/api/projects/files/rename`, {
+        method: "POST",
+        body: JSON.stringify({
+          project: projectPath,
+          parentPath: currentFolderPath,
+          oldName: currentContextFile.name,
+          newName: newName,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      fileContextPopup.classList.remove("visible");
+      delete folderCache[currentFolderPath];
+      openFolder(currentFolderPath);
+    });
+  });
+
+async function onChooseCreatedFileName(name, isFile) {
   let res = await fetch(`/api/projects/files/new`, {
     method: "POST",
     body: JSON.stringify({
@@ -188,19 +207,22 @@ async function createFile(name, isFile) {
       "Content-Type": "application/json",
     },
   });
-  return res.status == 200;
+
+  if (res.status == 200) {
+    openFolder(currentFolderPath);
+  }
 }
 
 document
   .getElementById("create-file-button")
   .addEventListener("click", (event) => {
-    showCreationMenu(true);
+    showCreationMenu(true, onChooseCreatedFileName);
   });
 
 document
   .getElementById("create-folder-button")
   .addEventListener("click", (event) => {
-    showCreationMenu(false);
+    showCreationMenu(false, onChooseCreatedFileName);
   });
 
 document
