@@ -122,7 +122,6 @@ def create_file(creator, project, parent_path, name, is_file):
         os.mkdir(fs_path)
     return True, None
 
-
 def delete_file(creator, project, parent_path, name):
     if not get_project(creator, project, is_folder=False):
         return False, "project not found"
@@ -147,6 +146,28 @@ def recursive_delete(path):
         os.rmdir(path)
     else:
         os.remove(path)
+
+def rename_file(creator, project, parent_path, old_name, new_name):
+    if not get_project(creator, project, is_folder=False):
+        return False, "project not found"
+
+    parent_fs_path = get_fs_path(creator, project, parent_path)
+    old_path = os.path.join(parent_fs_path, old_name)
+    new_path = os.path.join(parent_fs_path, new_name)
+
+    if not old_path or not new_path:
+        return False, "bad path"
+    if not os.path.isdir(os.path.dirname(old_path)):
+        return False, "bad parent"
+    if not os.path.isdir(os.path.dirname(new_path)):
+        return False, "bad parent"
+    if not os.path.exists(old_path):
+        return False, "does not exists"
+    if os.path.exists(new_path):
+        return False, "does not exists"
+
+    os.rename(old_path, new_path)
+    return True, None
 
 def get_fs_path(creator, project, file_path):
     user_path = get_rel_path("compiler_workspace", creator)
