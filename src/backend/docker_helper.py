@@ -62,7 +62,7 @@ def kill_container(sid):
 
 def compile_latex(sid):
     container = containers[sid]
-    res = container.exec_run(["pdflatex", "--shell-escape", "-interaction=nonstopmode",
+    res = container.exec_run(["timeout", "3", "pdflatex", "--shell-escape", "-interaction=nonstopmode",
         "-halt-on-error", "-output-directory=.", "main.tex"],
         workdir="/compile")
 
