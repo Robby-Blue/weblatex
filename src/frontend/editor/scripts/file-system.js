@@ -58,6 +58,8 @@ async function openFolder(path) {
   });
 
   for (let file of data) {
+    if (shouldSkipFile(file)) continue;
+
     let fileElement = document.createElement("p");
     fileElement.innerText = file.name + (file.is_file ? "" : "/");
 
@@ -77,6 +79,17 @@ async function openFolder(path) {
     });
 
     filePickerElement.appendChild(fileElement);
+  }
+}
+
+function shouldSkipFile(file) {
+  let hiddenFileExtentions = ["aux", "log", "pdf"];
+  let hiddenFolderNames = ["svg-inkscape"];
+  if (file.is_file) {
+    let extention = file.name.split(".").at(-1);
+    return hiddenFileExtentions.includes(extention);
+  } else {
+    return hiddenFolderNames.includes(file.name);
   }
 }
 
