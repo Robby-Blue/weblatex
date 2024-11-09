@@ -39,6 +39,10 @@ static_folders = [
         "files_path": "editor/scripts/tokenizers"
     },
     {
+        "url_path": "/git/*",
+        "files_path": "git"
+    },
+    {
         "url_path": "/change-password",
         "files_path": "change-password"
     },
@@ -349,6 +353,67 @@ def get_project_pdf(project):
     fs_path = projects.get_fs_path(user["username"], project, "")
     return send_from_directory(fs_path, "main.pdf")
 
+@app.route("/api/projects/git/status/<path:project>")
+def git_status(project):
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+
+    username = user["username"]
+
+    return_code = projects.is_project_or_parent_git(username, project)
+
+    return jsonify({
+        "isGit": return_code
+    })
+
+@app.route("/api/projects/git/init/", methods=["POST"])
+def git_init():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    
+    for key in ["project", "username", "email", "token", "repo"]:
+        if key not in request.form:
+            return Response(status=400)
+
+    project = request.form["project"]
+    git_name = request.form["username"]
+    git_email = request.form["email"]
+    git_token = request.form["token"]
+    repo_name = request.form["repo"]
+
+    success, error = projects.git_init(user["username"], project, git_name, git_email,
+        git_token, repo_name)
+
+    if not success:
+        return Response(error, status=400)
+
+    return redirect("/git/"+project)
+
+@app.route("/api/projects/git/commit/", methods=["POST"])
+def git_commit():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    
+    for key in ["project", "message"]:
+        if key not in request.form:
+            return Response(status=400)
+
+    project = request.form["project"]
+    message = request.form["message"]
+
+    success, error = projects.git_commit(user["username"], project, message)
+    
+    if not success:
+        return Response(error, status=400)
+
+    return redirect("/git/"+project)
+
 @socketio.on('connect')
 def handle_connect():
     pass
@@ -386,5 +451,4 @@ def handle_sigterm(*args):
     socketio.stop()
 
 signal.signal(signal.SIGTERM, handle_sigterm)
-
 socketio.run(app, host="0.0.0.0", port=3000, log_output=True)

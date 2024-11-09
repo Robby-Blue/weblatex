@@ -1,5 +1,6 @@
 from backend import db
 import os
+import subprocess
 
 def add_project(creator, parent_path, name, is_folder):
     if name == "":
@@ -167,6 +168,88 @@ def rename_file(creator, project, parent_path, old_name, new_name):
         return False, "does not exists"
 
     os.rename(old_path, new_path)
+    return True, None
+
+def get_projects_with_parents(creator, project):
+    return db.query("""
+WITH RECURSIVE project_hierarchy AS (
+    SELECT * 
+    FROM Projects 
+    WHERE creator = %s
+    AND path = %s
+    
+    UNION ALL
+    
+    SELECT p.*
+    FROM Projects p
+    JOIN project_hierarchy ph ON p.path = ph.parent_path
+    AND p.creator = ph.creator
+)
+SELECT * FROM project_hierarchy;
+""", (creator, project))
+
+def is_project_or_parent_git(creator, project_path):
+    projects = get_projects_with_parents(creator, project_path)
+    for project in projects:
+        if project["is_git"]:
+            return True
+    return False
+
+def git_init(creator, project, git_name, git_email, git_token, repo_name):
+    if not get_project(creator, project):
+        return False, "project not found"
+    if "." in repo_name:
+        return False, "bad repo name"
+    if is_project_or_parent_git(creator, project):
+        return False, "already in git"
+    
+    fs_path = get_fs_path(creator, project, "")
+    repo_url = f"https://{git_name}:{git_token}@github.com/{git_name}/{repo_name}.git"
+
+    p = subprocess.Popen(["git", "init"],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    p = subprocess.Popen(["git", "config", "--local", "user.name", git_name],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    p = subprocess.Popen(["git", "config", "--local", "user.email", git_email],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    p = subprocess.Popen(["git", "remote", "add", "origin", repo_url], cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+
+    db.execute("""
+UPDATE Projects
+SET is_git=true
+WHERE creator=%s AND path=%s
+""", (creator, project))
+
+    return True, None
+
+def git_commit(creator, project_path, commit_message):
+    project = get_project(creator, project_path)
+    if not project:
+        return False, "project not found"
+    if not project["is_git"]:
+        return False, "project not git"
+
+    fs_path = get_fs_path(creator, project_path, "")
+    p = subprocess.Popen(["git", "add", "."],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    p = subprocess.Popen(["git", "commit", "-am", commit_message],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    subprocess.Popen(["git", "push", "-u", "origin", "main"], cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    
     return True, None
 
 def get_fs_path(creator, project, file_path):

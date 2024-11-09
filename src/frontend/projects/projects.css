@@ -27,6 +27,11 @@ button {
     border-radius: 5px;
 }
 
+.project-container {
+    display: flex;
+    justify-content: space-between;
+}
+
 .name-popup {
     visibility: hidden;
     position: absolute;
