@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS Projects(
     is_folder BOOL NOT NULL,
     parent_path VARCHAR(50),
     creator VARCHAR(20) NOT NULL,
+    is_git BOOL DEFAULT FALSE NOT NULL,
     FOREIGN KEY (creator) REFERENCES Users(username)
 )
 """)

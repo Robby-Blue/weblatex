@@ -40,20 +40,33 @@ async function listFiles(path) {
       projectName += "/";
     }
 
-    let href = undefined;
+    let projectHref = undefined;
     if (project.is_folder) {
-      href = "/projects/" + project.path;
+      projectHref = "/projects/" + project.path;
     } else {
-      href = "/editor/" + project.path;
+      projectHref = "/editor/" + project.path;
     }
+    gitHref = "/git/" + project.path;
 
     let projectLinkElement = document.createElement("a");
     let projectLabelElement = document.createElement("p");
     projectLabelElement.innerText = projectName;
-    projectLinkElement.setAttribute("href", href);
+    projectLinkElement.setAttribute("href", projectHref);
     projectLinkElement.appendChild(projectLabelElement);
 
-    projectsListDiv.appendChild(projectLinkElement);
+    let gitLinkElement = document.createElement("a");
+    let gitLabelElement = document.createElement("p");
+    gitLabelElement.innerText = "git";
+    gitLinkElement.setAttribute("href", gitHref);
+    gitLinkElement.appendChild(gitLabelElement);
+
+    let projectContainer = document.createElement("div");
+    projectContainer.classList.add("project-container");
+
+    projectContainer.appendChild(projectLinkElement);
+    projectContainer.appendChild(gitLinkElement);
+
+    projectsListDiv.append(projectContainer);
   }
 }
 

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>git</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/menu.css">
+  <link rel="stylesheet" href="/git/git.css">
+  <script src="/git/git.js/" defer></script>
+</head>
+<body>
+    <div class="center-container">
+        <h1>git</h1>
+        <form action="/api/projects/git/init/" method="POST" class="hidden" id="init-git-form">
+            <input id="init-project" name="project" class="hidden">
+            <label for="username">git username</label><br>
+            <input id="username" name="username"><br>
+            <label for="email">git email</label><br>
+            <input id="email" name="email"><br>
+            <label for="token"> git tap (token)</label><br>
+            <input id="token" name="token" type="password"><br>
+            <label for="repo">repo name</label><br>
+            <input id="repo" name="repo"><br>
+            <input type="submit"
+                value="init" >
+        </form>
+
+        <form action="/api/projects/git/commit/" method="POST" class="hidden" id="commit-git-form">
+            <input id="commit-project" name="project" class="hidden">
+            <label for="message">commit message</label><br>
+            <input id="message" name="message"><br>
+            <input type="submit"
+                value="commit" >
+        </form>
+    </div>
+</body>
+</html>
