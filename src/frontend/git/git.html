@@ -13,6 +13,7 @@
     <div class="center-container">
         <h1>git</h1>
         <form action="/api/projects/git/init/" method="POST" class="hidden" id="init-git-form">
+            <h2>init</h2>
             <input id="init-project" name="project" class="hidden">
             <label for="username">git username</label><br>
             <input id="username" name="username"><br>
@@ -27,11 +28,21 @@
         </form>
 
         <form action="/api/projects/git/commit/" method="POST" class="hidden" id="commit-git-form">
+            <h2>commit</h2>
+            <p>this will automatically push</p>
             <input id="commit-project" name="project" class="hidden">
             <label for="message">commit message</label><br>
             <input id="message" name="message"><br>
             <input type="submit"
                 value="commit" >
+        </form>
+
+        <form action="/api/projects/git/pull/" method="POST" class="hidden" id="pull-git-form">
+            <h2>pull</h2>
+            <p>this will undo any uncommited changes</p>
+            <input id="pull-project" name="project" class="hidden">
+            <input type="submit"
+                value="pull" >
         </form>
     </div>
 </body>

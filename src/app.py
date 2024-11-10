@@ -414,6 +414,25 @@ def git_commit():
 
     return redirect("/git/"+project)
 
+@app.route("/api/projects/git/pull/", methods=["POST"])
+def git_pull():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    
+    if "project" not in request.form:
+        return Response(status=400)
+
+    project = request.form["project"]
+
+    success, error = projects.git_pull(user["username"], project)
+    
+    if not success:
+        return Response(error, status=400)
+
+    return redirect("/git/"+project)
+
 @socketio.on('connect')
 def handle_connect():
     pass
