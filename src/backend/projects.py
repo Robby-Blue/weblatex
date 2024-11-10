@@ -252,6 +252,28 @@ def git_commit(creator, project_path, commit_message):
     
     return True, None
 
+def git_pull(creator, project_path):
+    project = get_project(creator, project_path)
+    if not project:
+        return False, "project not found"
+    if not project["is_git"]:
+        return False, "project not git"
+
+    fs_path = get_fs_path(creator, project_path, "")
+    p = subprocess.Popen(["git", "reset", "--hard"],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    p = subprocess.Popen(["git", "clean", "-fd"],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    subprocess.Popen(["git", "pull", "origin", "main"], cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    
+    return True, None
+
 def get_fs_path(creator, project, file_path):
     user_path = get_rel_path("compiler_workspace", creator)
     if not user_path:
