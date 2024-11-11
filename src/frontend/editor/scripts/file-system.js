@@ -9,7 +9,7 @@ let fileCache = {};
 let filePickerElement = document.querySelector(".files-list");
 let currentPathElement = document.querySelector(".current-path-text");
 
-let pathName = window.location.pathname;
+let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/editor/".length);
 
 currentPathElement.addEventListener("click", (event) => {

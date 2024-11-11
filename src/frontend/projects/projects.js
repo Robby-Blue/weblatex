@@ -19,7 +19,7 @@ function onCreateClicked(isFolder) {
 
 let pathLabelElement = document.getElementById("folder-label");
 
-let path = window.location.pathname;
+let path = decodeURIComponent(window.location.pathname);
 path = path.substring("/projects/".length);
 pathLabelElement.innerText = "/" + path;
 

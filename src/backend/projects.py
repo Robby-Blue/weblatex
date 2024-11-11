@@ -11,7 +11,7 @@ def add_project(creator, parent_path, name, is_folder):
         parent_path = ""
     path = os.path.join(parent_path, name)
 
-    is_valid_name = all(x for x in name if x.isalnum() or x in "_-")
+    is_valid_name = all(c.isalnum() or c in "_-" for c in name)
     if not is_valid_name:
         return False, "invalid name"
     

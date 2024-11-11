@@ -5,7 +5,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 const pdfjsWorker = new pdfjsLib.PDFWorker();
 
-let pathName = window.location.pathname;
+let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/editor/".length);
 
 async function renderPage(page, canvas, parentWidth) {
