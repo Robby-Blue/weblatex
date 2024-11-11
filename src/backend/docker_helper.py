@@ -38,10 +38,10 @@ def start_container(sid, project_path):
 
     path = os.path.realpath(project_path)
 
+    mnt = docker.types.Mount(type="bind", source=path, target="/compile")
+
     container = docker_client.containers.run(image_name, detach=True, tty=True,
-        volumes={
-            path: {"bind": "/compile", "mode": "rw"}
-        },
+        mounts=[mnt],
         network_disabled=True
     )
     # this runs it as root

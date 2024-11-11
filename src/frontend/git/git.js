@@ -1,4 +1,4 @@
-let pathName = window.location.pathname;
+let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/git/".length);
 
 async function loadPage() {
