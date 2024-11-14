@@ -98,6 +98,7 @@ button.red {
     height: 50%;
     inset: 0;
     margin: auto;
+    z-index: 1;
 
     .shortcut {
         padding-top: 16px;
@@ -158,14 +159,45 @@ button.red {
 }
 
 /* pdf */
-#pages-container {
+.pdf-container {
     min-width: 50%;
+    background-color: rgb(20, 20, 20);
+    position: relative;
+}
+
+.pages-container {
     overflow: scroll;
     overflow-x: hidden;
-    background-color: rgb(20, 20, 20);
+    height: 100%;
 
     canvas {
         display: block;
         padding-bottom: 16px;
     }
+}
+
+.compile-error-popup {
+    visibility: hidden;
+    position: absolute;
+    user-select: none;
+    background-color: #1f1f1f;
+    border-radius: 16px;
+    padding: 16px;
+    inset: 0;
+    margin: 32px;
+    display: flex;
+    flex-direction: column;
+}
+
+.compile-error-popup.visible {
+    visibility: visible;
+}
+
+#compile-error-log {
+    height: 10em;
+    overflow: scroll;
+}
+
+#compile-error-title {
+    flex-grow: 1;
 }
