@@ -1,6 +1,7 @@
 import * as pdf from "/editor/pdf-viewer.js";
 import * as editor from "/editor/code-editor.js";
 import * as fs from "/editor/file-system.js";
+import * as compileErrors from "/editor/compile-error-handler.js";
 
 let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/editor/".length);
@@ -21,6 +22,10 @@ async function updatePDF() {
   let res = await fetch(`/api/projects/compile?${queryString}`, {
     method: "POST",
   });
+
+  let resData = await res.json();
+  compileErrors.onCompileResult(resData);
+
   if (res.status != 200) return;
   pdf.renderPDF();
 
