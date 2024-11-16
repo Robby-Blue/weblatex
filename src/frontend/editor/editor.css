@@ -156,6 +156,9 @@ button.red {
     .line {
         min-height: 1em;
     }
+    .highlight-error {
+        outline: red 1px solid;
+    }
 }
 
 /* pdf */
@@ -198,6 +201,6 @@ button.red {
     overflow: scroll;
 }
 
-#compile-error-title {
+.compile-parsed-error {
     flex-grow: 1;
 }
