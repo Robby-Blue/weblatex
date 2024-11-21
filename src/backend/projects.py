@@ -3,7 +3,8 @@ import os
 import subprocess
 
 def add_project(creator, parent_path, name, is_folder):
-    if name == "":
+    is_root_folder = name == ""
+    if is_root_folder:
         if parent_path is not None:
             return False, "invalid name"
 
@@ -14,13 +15,14 @@ def add_project(creator, parent_path, name, is_folder):
     is_valid_name = all(c.isalnum() or c in "_-" for c in name)
     if not is_valid_name:
         return False, "invalid name"
-    
-    if not get_project(creator, parent_path, is_folder=True):
-        return False, "parent doesnt exist"
+
     if get_project(creator, path):
         return False, "project already exists"
-    if os.path.exists(get_fs_path(creator, parent_path, name)):
-        return False, "file already exists"
+    if not is_root_folder:
+        if not get_project(creator, parent_path, is_folder=True):
+            return False, "parent doesnt exist"
+        if os.path.exists(get_fs_path(creator, parent_path, name)):
+            return False, "file already exists"
 
     db.execute(
 "INSERT INTO Projects (creator, path, parent_path, is_folder) VALUES (%s, %s, %s, %s)",
