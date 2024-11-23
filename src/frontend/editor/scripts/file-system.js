@@ -83,11 +83,15 @@ async function openFolder(path) {
 }
 
 function shouldSkipFile(file) {
-  let hiddenFileExtentions = ["aux", "log", "pdf"];
-  let hiddenFolderNames = ["svg-inkscape"];
+  let hiddenFileExtentions = ["aux", "log"];
+  let hiddenFileNames = ["main.pdf"];
+  let hiddenFolderNames = ["svg-inkscape", ".git"];
   if (file.is_file) {
     let extention = file.name.split(".").at(-1);
-    return hiddenFileExtentions.includes(extention);
+    return (
+      hiddenFileExtentions.includes(extention) ||
+      hiddenFileNames.includes(file.name)
+    );
   } else {
     return hiddenFolderNames.includes(file.name);
   }
