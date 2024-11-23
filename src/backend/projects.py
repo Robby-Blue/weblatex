@@ -45,24 +45,18 @@ def delete_project(creator, path):
     fs_path = get_fs_path(creator, path, "")
 
     if get_project(creator, path):
-       db.execute("""
-WITH RECURSIVE project_hierarchy AS (
-    SELECT path
-    FROM Projects
-    WHERE path = %s
-    
-    UNION ALL
-    
-    SELECT p.path
-    FROM Projects p
-    INNER JOIN project_hierarchy ph ON p.parent_path = ph.path
-)
-DELETE FROM Projects
-WHERE path IN (SELECT path FROM project_hierarchy);""",
-(path,))
+        recursive_delete_db(creator, path)
 
     if os.path.exists(fs_path):
         recursive_delete(fs_path)
+
+def recursive_delete_db(creator, path):
+    projects = db.query("SELECT path FROM Projects WHERE creator=%s AND parent_path=%s",
+(creator, path))
+    for project in projects:
+        recursive_delete_db(creator, project["path"])
+    db.execute("DELETE FROM Projects WHERE creator=%s AND path=%s",
+(creator, path))
 
 def get_projects(creator, parent_path):
     return db.query(

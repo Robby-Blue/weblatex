@@ -9,13 +9,6 @@ p, pre {
     word-break: keep-all
 }
 
-button {
-    border-radius: 0;
-    border: none;
-    padding: 4px;
-    background-color: rgb(91, 206, 250);
-}
-
 button.red {
     background-color: rgb(250, 91, 91);
 }

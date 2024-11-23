@@ -22,11 +22,6 @@ a {
 	text-decoration: none;
 }
 
-button {
-    border: none;
-    border-radius: 5px;
-}
-
 .popup {
     visibility: hidden;
     position: absolute;
