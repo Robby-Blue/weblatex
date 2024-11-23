@@ -39,7 +39,9 @@ def add_template(creator, project, template_name):
         file_path = os.path.join(template_folder, file_name)
         with open(file_path, "r") as f:
             content = f.read()
-        upload_file(creator, project, file_name, content)
+        fs_path = get_fs_path(creator, project, file_name)
+        with open(fs_path, "w") as f:
+            f.write(content)
 
 def delete_project(creator, path):
     fs_path = get_fs_path(creator, path, "")
