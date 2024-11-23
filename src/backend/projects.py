@@ -32,7 +32,7 @@ def add_project(creator, parent_path, name, is_folder):
     return True, None
 
 def add_template(creator, project, template_name):
-    if not get_project(creator, project, is_folder=False):
+    if not get_project(creator, project):
         return
     template_folder = os.path.join("templates", template_name)
     if not os.path.exists(template_folder):
@@ -230,6 +230,7 @@ SET is_git=true
 WHERE creator=%s AND path=%s
 """, (creator, project))
 
+    add_template(creator, project, "gitignore")
     return True, None
 
 def git_commit(creator, project_path, commit_message):
