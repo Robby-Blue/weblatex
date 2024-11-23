@@ -216,6 +216,19 @@ def new_project():
     first_path = "/projects" if is_folder else "/editor"
     return redirect(os.path.join(first_path, full_path))
 
+@app.route("/api/project/delete", methods=["POST"])
+def delete_project():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    username = user["username"]
+    if "path" not in request.json:
+        return Response(status=400)
+    path = request.json["path"]
+    projects.delete_project(username, path)
+    return Response(status=200)
+
 @app.route("/api/projects/files/")
 def get_files():
     if "project" not in request.args:

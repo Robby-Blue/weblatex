@@ -17,28 +17,22 @@ function onCreateClicked(isFolder) {
   nameFieldElement.focus();
 }
 
+let currentContextProject;
 let pathLabelElement = document.getElementById("folder-label");
 
 let path = decodeURIComponent(window.location.pathname);
 path = path.substring("/projects/".length);
 pathLabelElement.innerText = "/" + path;
 
-async function listFiles(path) {
+async function listProjects(path) {
   let queryString = new URLSearchParams({ path: path }).toString();
   let res = await fetch(`/api/projects?${queryString}`);
   let data = await res.json();
 
   let projectsListDiv = document.getElementById("project-list");
+  projectsListDiv.innerHTML = "";
   for (let project of data) {
-    let nameStartIndex = project.parent_path.length + 1;
-    if (project.parent_path.length == 0) {
-      nameStartIndex = 0;
-    }
-    let projectName = project.path.substring(nameStartIndex);
-
-    if (project.is_folder) {
-      projectName += "/";
-    }
+    let projectName = getProjectName(project);
 
     let projectHref = undefined;
     if (project.is_folder) {
@@ -54,20 +48,57 @@ async function listFiles(path) {
     projectLinkElement.setAttribute("href", projectHref);
     projectLinkElement.appendChild(projectLabelElement);
 
-    let gitLinkElement = document.createElement("a");
-    let gitLabelElement = document.createElement("p");
-    gitLabelElement.innerText = "git";
-    gitLinkElement.setAttribute("href", gitHref);
-    gitLinkElement.appendChild(gitLabelElement);
-
-    let projectContainer = document.createElement("div");
-    projectContainer.classList.add("project-container");
-
-    projectContainer.appendChild(projectLinkElement);
-    projectContainer.appendChild(gitLinkElement);
-
-    projectsListDiv.append(projectContainer);
+    projectLinkElement.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      currentContextProject = project;
+      showProjectContextMenu(event);
+      return false;
+    });
+    projectsListDiv.append(projectLinkElement);
   }
 }
 
-listFiles(path);
+function showProjectContextMenu() {
+  let popup = document.getElementById("context-popup");
+  popup.classList.add("visible");
+
+  let nameLabel = document.getElementById("project-context-label");
+  nameLabel.innerText = getProjectName(currentContextProject);
+}
+
+function getProjectName(project) {
+  let nameStartIndex = project.parent_path.length + 1;
+  if (project.parent_path.length == 0) {
+    nameStartIndex = 0;
+  }
+  let projectName = project.path.substring(nameStartIndex);
+
+  if (project.is_folder) {
+    projectName += "/";
+  }
+  return projectName;
+}
+
+let deleteProjectButton = document.getElementById("project-delete-button");
+deleteProjectButton.addEventListener("click", async (event) => {
+  await fetch(`/api/project/delete`, {
+    method: "POST",
+    body: JSON.stringify({
+      path: currentContextProject.path,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  listProjects(path);
+  let popup = document.getElementById("context-popup");
+  popup.classList.remove("visible");
+});
+let contextCloseButton = document.getElementById("context-close-button");
+contextCloseButton.addEventListener("click", (event) => {
+  let popup = document.getElementById("context-popup");
+  popup.classList.remove("visible");
+});
+
+listProjects(path);

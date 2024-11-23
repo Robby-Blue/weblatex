@@ -27,12 +27,7 @@ button {
     border-radius: 5px;
 }
 
-.project-container {
-    display: flex;
-    justify-content: space-between;
-}
-
-.name-popup {
+.popup {
     visibility: hidden;
     position: absolute;
     user-select: none;
@@ -53,7 +48,7 @@ button {
     }
 }
 
-.name-popup.visible {
+.popup.visible {
     visibility: visible;
 }
 

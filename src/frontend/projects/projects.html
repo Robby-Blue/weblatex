@@ -9,7 +9,7 @@
   <script src="/projects/projects.js/" defer></script>
 </head>
 <body>
-    <div class="name-popup" id="name-popup">
+    <div class="popup" id="name-popup">
         <h1 id="name-label">name</h1>
         <form action="/project/new/" method="POST">
             <input id="name-field" class="name-field full" type="text" placeholder="name" name="name">
@@ -17,6 +17,11 @@
             <input id="type-field" type="text" name="type" class="invisible" />
             <input type="submit" class="invisible" />
         </form>
+    </div>
+    <div class="popup" id="context-popup">
+        <h1 id="project-context-label"></h1>
+        <button id="project-delete-button">delete</button>
+        <button id="context-close-button">close</button>
     </div>
     <div class="center-container">
         <div class="folder-container">
