@@ -8,9 +8,7 @@ def add_project(creator, parent_path, name, is_folder):
         if parent_path is not None:
             return False, "invalid name"
 
-    if parent_path is None:
-        parent_path = ""
-    path = os.path.join(parent_path, name)
+    path = os.path.join("" if not parent_path else parent_path, name)
 
     is_valid_name = all(c.isalnum() or c in "_-" for c in name)
     if not is_valid_name:
@@ -42,6 +40,29 @@ def add_template(creator, project, template_name):
         with open(file_path, "r") as f:
             content = f.read()
         upload_file(creator, project, file_name, content)
+
+def delete_project(creator, path):
+    fs_path = get_fs_path(creator, path, "")
+
+    if get_project(creator, path):
+       db.execute("""
+WITH RECURSIVE project_hierarchy AS (
+    SELECT path
+    FROM Projects
+    WHERE path = %s
+    
+    UNION ALL
+    
+    SELECT p.path
+    FROM Projects p
+    INNER JOIN project_hierarchy ph ON p.parent_path = ph.path
+)
+DELETE FROM Projects
+WHERE path IN (SELECT path FROM project_hierarchy);""",
+(path,))
+
+    if os.path.exists(fs_path):
+        recursive_delete(fs_path)
 
 def get_projects(creator, parent_path):
     return db.query(
