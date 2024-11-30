@@ -381,6 +381,20 @@ def git_status(project):
         "isGit": return_code
     })
 
+@app.route("/api/projects/git/diff/<path:project>")
+def git_diff(project):
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+
+    username = user["username"]
+    output, error = projects.git_diff(username, project)
+    
+    if error:
+        return Response(response=error, status=400)
+    return Response(output, mimetype="text/plain")
+
 @app.route("/api/projects/git/init/", methods=["POST"])
 def git_init():
     token = request.cookies.get("token", None)
