@@ -210,10 +210,12 @@ SELECT * FROM project_hierarchy;
 
 def is_project_or_parent_git(creator, project_path):
     projects = get_projects_with_parents(creator, project_path)
+    if len(projects) == 0:
+        return None, False
     for project in projects:
         if project["is_git"]:
-            return True
-    return False
+            return True, True
+    return False, True
 
 def git_init(creator, project, git_name, git_email, git_token, repo_name):
     if not get_project(creator, project):

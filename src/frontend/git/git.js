@@ -71,6 +71,12 @@ async function showDiff() {
 
 async function loadPage() {
     let r = await fetch("/api/projects/git/status/" + projectPath);
+
+    if (r.status == 404) {
+        let errorArea = document.getElementById("error-area");
+        errorArea.classList.remove("hidden");
+    }
+
     let data = await r.json();
 
     if (data.isGit) {
