@@ -26,7 +26,8 @@ def add_project(creator, parent_path, name, is_folder):
 "INSERT INTO Projects (creator, path, parent_path, is_folder) VALUES (%s, %s, %s, %s)",
 (creator, path, parent_path, is_folder))
     os.mkdir(get_fs_path(creator, path, ""))
-    add_template(creator, path, "empty_document")
+    if not is_folder:
+        add_template(creator, path, "empty_document")
     return True, None
 
 def add_template(creator, project, template_name):
@@ -293,6 +294,21 @@ def git_pull(creator, project_path):
         return False, p.returncode
     
     return True, None
+
+def git_diff(creator, project_path):
+    project = get_project(creator, project_path)
+    if not project:
+        return None, "project not found"
+    if not project["is_git"]:
+        return None, "project not git"
+    
+    fs_path = get_fs_path(creator, project_path, "")
+    p = subprocess.Popen(["git", "diff", "HEAD"],
+        cwd=fs_path, stdout=subprocess.PIPE)
+    if p.wait():
+        return None, p.returncode
+    out = p.stdout.read()
+    return out, None
 
 def get_fs_path(creator, project, file_path):
     user_path = get_rel_path("compiler_workspace", creator)

@@ -1,3 +1,28 @@
 .hidden {
     display: none;
 }
+
+.file-label {
+    margin-bottom: 0;
+}
+
+.code-area {
+    margin-bottom: 16px;
+}
+
+.code {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: keep-all;
+    font-family: "Consolas", "Courier New", Courier, monospace;
+}
+
+.unedited{
+    background-color: rgb(27, 27, 27);;
+}
+.added{
+    background-color: rgb(0, 121, 0);
+}
+.removed{
+    background-color: rgb(201, 38, 38);
+}
