@@ -375,11 +375,14 @@ def git_status(project):
 
     username = user["username"]
 
-    return_code = projects.is_project_or_parent_git(username, project)
+    is_git, exists = projects.is_project_or_parent_git(username, project)
 
-    return jsonify({
-        "isGit": return_code
-    })
+    if exists:
+        return jsonify({
+            "isGit": is_git
+        })
+    else:
+        return Response(status=404)
 
 @app.route("/api/projects/git/diff/<path:project>")
 def git_diff(project):
