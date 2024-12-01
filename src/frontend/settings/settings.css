@@ -1,0 +1,17 @@
+.setting-div {
+    display: flex;
+    padding-bottom: 8px;
+}
+
+p {
+    margin: 0;
+    padding-right: 8px;
+}
+
+input {
+    margin: 0;
+}
+
+input[type=number] {
+    width: 48px;
+}
