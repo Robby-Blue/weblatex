@@ -1,6 +1,8 @@
 import docker
 import os
 
+from backend import settings
+
 image_name = "weblatex-compilation"
 
 docker_client = docker.from_env()
@@ -32,12 +34,14 @@ def build_image():
         rm=True
     )
 
-def start_container(sid, project_path):
+def start_container(sid, username, project_path):
     if sid in containers:
         return False
 
-    path = os.path.realpath(project_path)
+    setting, _ = settings.get_user_setting(username, "compile-timeout")
+    compile_timeout = setting["value"]
 
+    path = os.path.realpath(project_path)
     mnt = docker.types.Mount(type="bind", source=path, target="/compile")
 
     container = docker_client.containers.run(image_name, detach=True, tty=True,
@@ -50,7 +54,10 @@ def start_container(sid, project_path):
     # to nothing but the project itself
     # this hopefully makes it secure enough
 
-    containers[sid] = container
+    containers[sid] = {
+        "container": container,
+        "compile_timeout": compile_timeout
+    }
     return True
 
 def has_container(sid):
@@ -62,7 +69,8 @@ def kill_container(sid):
 
 def compile_latex(sid):
     container = containers[sid]
-    res = container.exec_run(["timeout", "3", "pdflatex", "--shell-escape", "-interaction=nonstopmode",
+    compile_timeout = container["compile_timeout"]
+    res = container["container"].exec_run(["timeout", str(compile_timeout), "pdflatex", "--shell-escape", "-interaction=nonstopmode",
         "-halt-on-error", "-output-directory=.", "main.tex"],
         workdir="/compile")
 

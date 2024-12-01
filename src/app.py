@@ -7,6 +7,7 @@ import mimetypes
 from backend import docker
 from backend import users
 from backend import projects
+from backend import settings
 
 docker.init()
 
@@ -53,6 +54,10 @@ static_folders = [
     {
         "url_path": "/invalidate-tokens",
         "files_path": "invalidate-tokens"
+    },
+    {
+        "url_path": "/settings",
+        "files_path": "settings"
     }
 ]
 
@@ -384,20 +389,6 @@ def git_status(project):
     else:
         return Response(status=404)
 
-@app.route("/api/projects/git/diff/<path:project>")
-def git_diff(project):
-    token = request.cookies.get("token", None)
-    user = users.get_token(token)
-    if not user:
-        return Response(status=401)
-
-    username = user["username"]
-    output, error = projects.git_diff(username, project)
-    
-    if error:
-        return Response(response=error, status=400)
-    return Response(output, mimetype="text/plain")
-
 @app.route("/api/projects/git/init/", methods=["POST"])
 def git_init():
     token = request.cookies.get("token", None)
@@ -463,6 +454,56 @@ def git_pull():
 
     return redirect("/git/"+project)
 
+@app.route("/api/projects/git/diff/<path:project>")
+def git_diff(project):
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+
+    username = user["username"]
+    output, error = projects.git_diff(username, project)
+    
+    if error:
+        return Response(response=error, status=400)
+    return Response(output, mimetype="text/plain")
+
+@app.route("/api/settings")
+def get_settings():
+    token = request.cookies.get("token", None)
+    user = users.get_user_from_token(token)
+    if not user:
+        return Response(status=401)
+
+    username = user["username"]
+    is_admin = user["is_admin"]
+    user_settings = settings.get_user_settings(username, is_admin)
+    
+    return jsonify(user_settings)
+
+@app.route("/api/settings", methods=["POST"])
+def set_settings():
+    if "key" not in request.json:
+        return Response(status=400)
+    key = request.json["key"]
+    if "value" not in request.json:
+        return Response(status=400)
+    value = request.json["value"]
+    
+    token = request.cookies.get("token", None)
+    user = users.get_user_from_token(token)
+    if not user:
+        return Response(status=401)
+
+    username = user["username"]
+    is_admin = user["is_admin"]
+    success, error = settings.change_user_setting_value(username, key, value, is_admin)
+    
+    if not success:
+        return Response(error, status=400)
+
+    return Response(status=200)
+
 @socketio.on('connect')
 def handle_connect():
     pass
@@ -490,7 +531,7 @@ def handle_message(message):
 
     project_path = os.path.join(data_folder, username, project)
 
-    success = docker.start_container(request.sid, project_path)
+    success = docker.start_container(request.sid, username, project_path)
     if not success:
         return
 

@@ -67,6 +67,17 @@ CREATE TABLE IF NOT EXISTS Projects(
 )
 """)
         
+        # setting_key because just 'key' is reserved
+        self.execute("""
+CREATE TABLE IF NOT EXISTS Settings(
+    username VARCHAR(20) NOT NULL,
+    setting_key VARCHAR(20) NOT NULL,
+    value INT NOT NULL,
+    editable BOOL NOT NULL,
+    FOREIGN KEY (username) REFERENCES Users(username)
+)
+""")
+        
         if len(self.query(
 "SELECT * FROM Users LIMIT 1")) == 0:
             from backend import users
