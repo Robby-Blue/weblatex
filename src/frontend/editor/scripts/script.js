@@ -35,22 +35,23 @@ async function updatePDF() {
 
 editor.onSave(async (src) => {
     compileButton.classList.add("red");
-    let success = await fs.updateCurrentFile(src);
+    let success = await fs.uploadCurrentFile(src);
     if (!success) return;
 
     if (!settings.getSetting("auto-compile")) return;
+
+    let successAll = await fs.uploadAllFiles();
+    if (!successAll) return;
+
     updatePDF();
 });
 
 button("compile-button", async (event) => {
     compileButton.classList.add("red");
-    if (uploadTimeoutId) {
-        clearTimeout(uploadTimeoutId);
-    }
-    // TODO: need to upload files first
-    // add fields to the fs code indicating
-    // whether each file has been synced
-    // then make a function to sync all
+
+    let success = await fs.uploadAllFiles();
+    if (!success) return;
+
     updatePDF();
 });
 

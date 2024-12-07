@@ -1,6 +1,7 @@
 import * as fs from "/editor/file-system.js";
 import * as latex_tokenizer from "/editor/latex-tokenizer.js";
 import * as shortcuts from "/editor/shortcuts.js";
+import * as settings from "/settings.js";
 
 let tokenizers = {
     ".tex": latex_tokenizer.tokenize,
@@ -273,8 +274,9 @@ editorDiv.addEventListener("keydown", (event) => {
 
 let uploadTimeoutId = null;
 
-editorDiv.addEventListener("input", () => {
+function processInput() {
     let src = highlightCurrentSyntax();
+    fs.updateCurrentFile(src);
 
     if (uploadTimeoutId) {
         clearTimeout(uploadTimeoutId);
@@ -284,7 +286,11 @@ editorDiv.addEventListener("input", () => {
 
     uploadTimeoutId = setTimeout(async () => {
         save_cb(src);
-    }, 1000);
+    }, 10000);
+}
+
+editorDiv.addEventListener("input", () => {
+    processInput();
 });
 
 editorDiv.addEventListener("paste", function (event) {
@@ -309,7 +315,7 @@ editorDiv.addEventListener("paste", function (event) {
         setCaretPosition(offset + pastedText.length, selectedDiv);
     }
 
-    save_cb(newSrc);
+    processInput(newSrc);
 });
 
 shortcuts.onShortcut((shortcutFunc, kwargs) => {
@@ -318,5 +324,5 @@ shortcuts.onShortcut((shortcutFunc, kwargs) => {
     let newSrc = shortcutFunc(src, selectionAbsOffset, kwargs);
     if (!newSrc) return;
     updateSyntaxHighlight(newSrc);
-    save_cb(newSrc);
+    processInput(newSrc);
 });
