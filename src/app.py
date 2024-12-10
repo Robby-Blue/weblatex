@@ -369,7 +369,10 @@ def get_project_pdf(project):
     if not projects.get_project(user["username"], project, is_folder=False):
         return Response(status=401)
     fs_path = projects.get_fs_path(user["username"], project, "")
-    return send_from_directory(fs_path, "main.pdf")
+
+    project_name = project.split("/")[-1]
+    return send_from_directory(fs_path, "main.pdf",
+        download_name=f"{project_name}.pdf")
 
 @app.route("/api/projects/git/status/<path:project>")
 def git_status(project):
