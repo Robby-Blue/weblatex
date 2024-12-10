@@ -291,5 +291,13 @@ function uploadFileSelection(event) {
     reader.readAsText(file);
 }
 
+window.addEventListener("beforeunload", (event) => {
+    let files = Object.values(fileCache);
+    let anyFileUnsaved = files.some((file) => !file.synced);
+    if (anyFileUnsaved) {
+        event.preventDefault();
+    }
+});
+
 openFile(currentFilePath);
 openFolder(currentFolderPath);
