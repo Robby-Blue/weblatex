@@ -36,24 +36,29 @@
       </div>
     </div>
     <div class="code-container">
-      <div class="code-header">
+      <div class="options-header">
         <button>Settings</button>
         <input id="open-shortcut-field" class="shortcut-field" type="text" placeholder="shortcut">
         <button id="compile-button">Compile</button>
       </div>
       <pre><div id="editor" spellcheck="false" contenteditable="true"></div></pre>
     </div>
-    <div class="pdf-container">
-      <div id="pages-container" class="pages-container"></div>
-      <div id="compile-error-popup" class="compile-error-popup">
-        <div class="compile-parsed-error">
-          <h1 id="compile-error-title"></h1>
-          <p id="compile-error-full-error"></p>
-        </div>
-        <button id="compile-error-line"></button>
-        <div>
-          <h2>log</h2>
-          <p id="compile-error-log"></p>
+    <div class="output-container">
+      <div class="options-header">
+        <button id="download-button">Download</button>
+      </div>
+      <div class="pdf-container">
+        <div id="pages-container" class="pages-container"></div>
+        <div id="compile-error-popup" class="compile-error-popup">
+          <div class="compile-parsed-error">
+            <h1 id="compile-error-title"></h1>
+            <p id="compile-error-full-error"></p>
+          </div>
+          <button id="compile-error-line"></button>
+          <div>
+            <h2>log</h2>
+            <p id="compile-error-log"></p>
+          </div>
         </div>
       </div>
     </div>

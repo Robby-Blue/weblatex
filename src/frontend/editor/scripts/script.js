@@ -55,6 +55,12 @@ button("compile-button", async (event) => {
     updatePDF();
 });
 
+button("download-button", async (event) => {
+    let anchorElement = document.createElement("a");
+    anchorElement.href = `/api/projects/pdf/${projectPath}`;
+    anchorElement.click();
+});
+
 let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;
 
