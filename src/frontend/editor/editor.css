@@ -165,13 +165,20 @@ button.red {
     min-width: 50%;
     background-color: rgb(20, 20, 20);
     position: relative;
-    overflow: scroll;
+    height: 100vh;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.pdf-container {
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 .pages-container {
-    overflow: scroll;
     overflow-x: hidden;
-    height: 100%;
 
     canvas {
         display: block;
