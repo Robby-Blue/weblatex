@@ -61,6 +61,9 @@ button("download-button", async (event) => {
     anchorElement.click();
 });
 
+let viewLinkElement = document.getElementById("view-pdf-link");
+viewLinkElement.setAttribute("href", `/view/${projectPath}`);
+
 let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;
 

@@ -40,6 +40,10 @@ static_folders = [
         "files_path": "editor/scripts/tokenizers"
     },
     {
+        "url_path": "/view/*",
+        "files_path": "view"
+    },
+    {
         "url_path": "/git/*",
         "files_path": "git"
     },
@@ -371,8 +375,9 @@ def get_project_pdf(project):
     fs_path = projects.get_fs_path(user["username"], project, "")
 
     project_name = project.split("/")[-1]
-    return send_from_directory(fs_path, "main.pdf",
+    response = send_from_directory(fs_path, "main.pdf",
         download_name=f"{project_name}.pdf")
+    return response
 
 @app.route("/api/projects/git/status/<path:project>")
 def git_status(project):
