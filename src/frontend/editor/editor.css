@@ -63,7 +63,7 @@ button.red {
     display: flex;
     justify-content: space-between;
 
-    > button {
+    > button, * > button {
         padding: 6px;
         margin-left: 2px;
         margin-right: 2px;
