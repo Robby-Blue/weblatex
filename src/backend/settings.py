@@ -25,16 +25,19 @@ def get_user_settings(username, is_admin=False):
     settings = []
     db_settings = db.query("SELECT * FROM Settings WHERE username=%s", (username,))
     for key in default_settings.keys():
-        settings.append(get_setting(key, db_settings, is_admin))
+        setting = get_setting(key, db_settings)
+        if is_admin:
+            setting["editable"] = True
+        settings.append(setting)
     return settings
 
-def get_user_setting(username, key, db_settings=None, is_admin=False):
+def get_user_setting(username, key, db_settings=None):
     if not db_settings:
         db_settings = db.query("SELECT * FROM Settings WHERE username=%s", (username,))
-    setting = get_setting(key, db_settings, is_admin)
+    setting = get_setting(key, db_settings)
     return setting, db_settings
 
-def get_setting(key, db_settings, is_admin=False):
+def get_setting(key, db_settings):
     setting_default = default_settings[key]
     name = setting_default["name"]
 
@@ -51,9 +54,6 @@ def get_setting(key, db_settings, is_admin=False):
         value = setting_default["value"]
         editable = setting_default["editable"]
 
-    if is_admin:
-        editable = True
-
     return {
         "key": key,
         "name": name,
@@ -64,8 +64,8 @@ def get_setting(key, db_settings, is_admin=False):
     }
 
 def change_user_setting_value(username, key, value, is_admin=False):
-    setting, _ = get_user_setting(username, key, is_admin=is_admin)
-    if not setting["editable"]:
+    setting, _ = get_user_setting(username, key)
+    if not (is_admin or setting["editable"]):
         return False, "not allowed to edit"
     
     if setting["in_db"]:
