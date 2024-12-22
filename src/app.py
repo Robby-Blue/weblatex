@@ -72,13 +72,30 @@ for folder in static_folders:
 
     for file_name in os.listdir(folder_path):
         url_path = folder["url_path"]
-        if not file_name.endswith(".html"):
+
+        is_indirect = url_path.endswith("/*")
+        if is_indirect:
             url_path = url_path.removesuffix("/*")
-            url_path = os.path.join(url_path, file_name)
+
+        # eg. foo/bar/bar.js
+        is_doubled = file_name.split(".")[0] == url_path.split("/")[-1]
+        if is_doubled:
+            url_path = url_path[:url_path.rindex("/")]
+        url_path = f"{url_path}/{file_name}"
+
+        remove_type = file_name.endswith(".html")
+        if remove_type:
+            url_path = url_path[:url_path.rindex(".")]
+            if is_indirect:
+                url_path = url_path + "/*"
+        url_path = url_path.replace("//", "/")
+
         file_path = os.path.join(folder_path, file_name)
 
         if not os.path.isfile(file_path):
             continue
+
+        print(url_path, file_path)
 
         mimetype, _ = mimetypes.guess_type(file_name)
 
