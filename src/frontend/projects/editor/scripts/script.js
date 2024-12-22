@@ -1,11 +1,11 @@
-import * as pdf from "/editor/pdf-viewer.js";
-import * as editor from "/editor/code-editor.js";
-import * as fs from "/editor/file-system.js";
-import * as compileErrors from "/editor/compile-error-handler.js";
+import * as pdf from "/projects/editor/pdf-viewer.js";
+import * as editor from "/projects/editor/code-editor.js";
+import * as fs from "/projects/editor/file-system.js";
+import * as compileErrors from "/projects/editor/compile-error-handler.js";
 import * as settings from "/settings.js";
 
 let pathName = decodeURIComponent(window.location.pathname);
-let projectPath = pathName.substring("/editor/".length);
+let projectPath = pathName.substring("/projects/editor/".length);
 let sid = undefined;
 
 let compileButton = document.getElementById("compile-button");
@@ -62,7 +62,7 @@ button("download-button", async (event) => {
 });
 
 let viewLinkElement = document.getElementById("view-pdf-link");
-viewLinkElement.setAttribute("href", `/view/${projectPath}`);
+viewLinkElement.setAttribute("href", `/projects/view/${projectPath}`);
 
 let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;

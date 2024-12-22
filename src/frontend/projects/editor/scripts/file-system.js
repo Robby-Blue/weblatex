@@ -1,4 +1,4 @@
-import * as editor from "/editor/code-editor.js";
+import * as editor from "/projects/editor/code-editor.js";
 
 export let currentFolderPath = ".";
 export let currentFilePath = "main.tex";
@@ -10,7 +10,7 @@ let filePickerElement = document.querySelector(".files-list");
 let currentPathElement = document.querySelector(".current-path-text");
 
 let pathName = decodeURIComponent(window.location.pathname);
-let projectPath = pathName.substring("/editor/".length);
+let projectPath = pathName.substring("/projects/editor/".length);
 
 currentPathElement.addEventListener("click", (event) => {
     if (currentFolderPath == ".") {

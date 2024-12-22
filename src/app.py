@@ -24,28 +24,28 @@ static_folders = [
         "files_path": "login"
     },
     {
-        "url_path": "/projects/*",
-        "files_path": "projects"
+        "url_path": "/projects/explorer/*",
+        "files_path": "projects/explorer"
     },
     {
-        "url_path": "/editor/*",
-        "files_path": "editor"
+        "url_path": "/projects/editor/*",
+        "files_path": "projects/editor"
     },
     {
-        "url_path": "/editor",
-        "files_path": "editor/scripts"
+        "url_path": "/projects/editor",
+        "files_path": "projects/editor/scripts"
     },
     {
-        "url_path": "/editor",
-        "files_path": "editor/scripts/tokenizers"
+        "url_path": "/projects/editor",
+        "files_path": "projects/editor/scripts/tokenizers"
     },
     {
-        "url_path": "/view/*",
-        "files_path": "view"
+        "url_path": "/projects/view/*",
+        "files_path": "projects/view"
     },
     {
-        "url_path": "/git/*",
-        "files_path": "git"
+        "url_path": "/projects/git/*",
+        "files_path": "projects/git"
     },
     {
         "url_path": "/change-password",
@@ -94,7 +94,7 @@ def index():
     token = request.cookies.get("token")
 
     if token and users.get_token(token):
-        return redirect("/projects")
+        return redirect("/projects/explorer")
     else:
         return redirect("/login")
 
@@ -150,7 +150,7 @@ def login():
             request.form["password"]):
         token = users.add_token(request.form["username"])
 
-        r = redirect("/projects")
+        r = redirect("/projects/explorer")
         r.set_cookie("token", token, httponly=True, samesite="Strict", max_age=315360000)
         return r
     else:
@@ -176,7 +176,7 @@ def invalidate_tokens():
     users.invalidate_tokens(user["username"])
     new_token = users.add_token(user["username"])
 
-    r = redirect("/projects")
+    r = redirect("/projects/explorer")
     r.set_cookie("token", new_token, httponly=True, samesite="Strict", max_age=315360000)
     return r
 
@@ -222,7 +222,7 @@ def new_project():
         return Response(error, status=400)
 
     full_path = os.path.join(parent, name) 
-    first_path = "/projects" if is_folder else "/editor"
+    first_path = "/projects/explorer" if is_folder else "/projects/editor"
     return redirect(os.path.join(first_path, full_path))
 
 @app.route("/api/project/delete", methods=["POST"])
@@ -420,7 +420,7 @@ def git_init():
     if not success:
         return Response(error, status=400)
 
-    return redirect("/git/"+project)
+    return redirect("/projects/git/"+project)
 
 @app.route("/api/projects/git/commit/", methods=["POST"])
 def git_commit():
@@ -441,7 +441,7 @@ def git_commit():
     if not success:
         return Response(error, status=400)
 
-    return redirect("/git/"+project)
+    return redirect("/projects/git/"+project)
 
 @app.route("/api/projects/git/pull/", methods=["POST"])
 def git_pull():
@@ -460,7 +460,7 @@ def git_pull():
     if not success:
         return Response(error, status=400)
 
-    return redirect("/git/"+project)
+    return redirect("/projects/git/"+project)
 
 @app.route("/api/projects/git/diff/<path:project>")
 def git_diff(project):

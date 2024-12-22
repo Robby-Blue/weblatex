@@ -1,5 +1,5 @@
 let pathName = decodeURIComponent(window.location.pathname);
-let projectPath = pathName.substring("/view/".length);
+let projectPath = pathName.substring("/projects/view/".length);
 if (projectPath.charAt(projectPath.length - 1) == "/") {
     projectPath = projectPath.substring(0, projectPath.length - 1);
 }
