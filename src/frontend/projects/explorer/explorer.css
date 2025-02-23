@@ -47,8 +47,13 @@ a {
     visibility: visible;
 }
 
+.invisible {
+    visibility: hidden;
+}
+
 .name-field {
     background-color: rgb(20, 20, 20);
+    width: 100%;
     color: white;
     outline: none;
     border: none;

@@ -9,26 +9,31 @@
   <script src="/projects/explorer.js" defer></script>
 </head>
 <body>
-    <div class="popup" id="name-popup">
-        <h1 id="name-label">name</h1>
-        <form action="/project/new/" method="POST">
-            <input id="name-field" class="name-field full" type="text" placeholder="name" name="name">
-            <input id="parent-field" type="text" name="parent" class="invisible" />
-            <input id="type-field" type="text" name="type" class="invisible" />
-            <input type="submit" class="invisible" />
-        </form>
-    </div>
-    <div class="popup" id="context-popup">
-        <h1 id="project-context-label"></h1>
-        <button id="project-delete-button">delete</button>
-        <button id="context-close-button">close</button>
+    <div class="popup" id="popup">
+        <div id="new-file-div">
+            <h1 id="name-label">name</h1>
+            <input id="name-field-blank" class="name-field" type="text" placeholder="name">
+        </div>
+        <div id="from-git-div">
+            <h1 id="name-label">from github</h1>
+            <input id="local-name-field" class="name-field" type="text" placeholder="local name">
+            <input id="gh-link-field" class="name-field" type="text" placeholder="url">
+            <input id="gh-email-field" class="name-field" type="text" placeholder="gh email">
+            <input id="gh-pat-field" class="name-field" type="text" placeholder="pat">
+            <button id="gh-clone-button">clone</button>
+        </div>
+        <div id="context-div">
+            <h1 id="project-context-label"></h1>
+            <button id="project-delete-button">delete</button>
+        </div>
     </div>
     <div class="center-container">
         <div class="folder-container">
             <p id="folder-label"></p>
             <div>
-                <button onclick="onCreateClicked(false)">new project</button>
-                <button onclick="onCreateClicked(true)">new folder</button>
+                <button onclick="onCreateClicked('project')">new project</button>
+                <button onclick="onCreateClicked('folder')">new folder</button>
+                <button onclick="onCreateClicked('git')">from gh</button>
             </div>
         </div>
         <div id="project-list"></div>
