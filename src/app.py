@@ -583,7 +583,7 @@ def handle_message(message):
             message["project"], is_folder=False):
         return
 
-    data_folder = "/var/lib/weblatex"
+    data_folder = os.getenv("WORKSPACE_PATH")
     project = message["project"] 
 
     project_path = os.path.join(data_folder, username, project)
