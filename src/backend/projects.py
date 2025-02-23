@@ -222,7 +222,7 @@ def git_init(creator, project, git_name, git_email, git_token, repo_name):
         return False, "project not found"
     if "." in repo_name:
         return False, "bad repo name"
-    if is_project_or_parent_git(creator, project):
+    if is_project_or_parent_git(creator, project)[0]:
         return False, "already in git"
     
     fs_path = get_fs_path(creator, project, "")
@@ -311,6 +311,96 @@ def git_diff(creator, project_path):
         return None, p.returncode
     out = p.stdout.read()
     return out, None
+
+def git_clone(creator, parent_path, project_name, repo_url, pat, email):
+    # basics
+    project = get_project(creator, parent_path)
+    if not project:
+        return False, "parent not found"
+    
+    path = os.path.join("" if not parent_path else parent_path, project_name)
+
+    is_valid_name = all(c.isalnum() or c in "_-" for c in project_name)
+    if not is_valid_name:
+        return False, "invalid name"
+    if get_project(creator, path):
+        return False, "project already exists"
+    if is_project_or_parent_git(creator, parent_path)[0]:
+        return False, "already in git"
+
+    # parse url
+    if "github.com" not in repo_url:
+        return False, "only github for now"
+
+    repo_url = repo_url[repo_url.index("github.com"):]
+    repo_url = repo_url.removesuffix("/")
+    parts = repo_url.split("/")
+    if len(parts) != 3:
+        return False, "bad url"
+    
+    _, git_name, gh_repo_name = parts
+
+    # clone from new url
+    clone_url = f"https://{git_name}:{pat}@github.com/{git_name}/{gh_repo_name}.git"
+
+    fs_path = get_fs_path(creator, path, "")
+    os.mkdir(fs_path)
+    p = subprocess.Popen(["git", "clone", clone_url, "."],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    
+    # set config
+    p = subprocess.Popen(["git", "config", "--local", "user.name", git_name],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    p = subprocess.Popen(["git", "config", "--local", "user.email", email],
+        cwd=fs_path)
+    if p.wait():
+        return False, p.returncode
+    
+    # find and add sub projects
+    new_projects = discover_cloned_projects(creator, path)
+
+    for new_project in new_projects:
+        new_path, is_project, new_parent = new_project 
+        db.execute(
+"INSERT INTO Projects (creator, path, parent_path, is_folder) VALUES (%s, %s, %s, %s)",
+(creator, new_path, new_parent, not is_project))
+
+    db.execute("""
+UPDATE Projects
+SET is_git=true
+WHERE creator=%s AND path=%s
+""", (creator, path))
+
+    return True, None
+
+def discover_cloned_projects(creator, path):
+    discovered_projects = []
+
+    parent_path = path[:0 if "/" not in path else path.rindex("/")]
+    fs_path = get_fs_path(creator, path, "")
+
+    maintex_path = os.path.join(fs_path, "main.tex")
+    is_project = os.path.exists(maintex_path)
+
+    if is_project:
+        discovered_projects.append((path, is_project, parent_path))
+    
+    sub_projects = []
+    for file in os.listdir(fs_path):
+        sub_path = os.path.join(fs_path, file)
+        if not os.path.isdir(sub_path):
+            continue
+        sub_projects += discover_cloned_projects(creator, path+"/"+file)
+
+    if sub_projects and not is_project:
+        discovered_projects.append((path, is_project, parent_path))
+    discovered_projects += sub_projects
+
+    return discovered_projects    
 
 def get_fs_path(creator, project, file_path):
     user_path = get_rel_path("compiler_workspace", creator)

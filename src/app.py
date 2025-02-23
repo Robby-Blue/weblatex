@@ -212,7 +212,7 @@ def create_account():
     users.add_user(request.form["username"], request.form["password"])
     return redirect("/")
 
-@app.route("/project/new/", methods=["POST"])
+@app.route("/api/project/new/", methods=["POST"])
 def new_project():
     token = request.cookies.get("token", None)
     user = users.get_token(token)
@@ -220,19 +220,19 @@ def new_project():
         return Response(status=401)
     username = user["username"]
 
-    if "name" not in request.form:
+    if "name" not in request.json:
         return Response(status=400)
-    if "parent" not in request.form:
+    if "parent" not in request.json:
         return Response(status=400)
-    if "type" not in request.form:
+    if "type" not in request.json:
         return Response(status=400)
-    if request.form["type"] != "project" and request.form["type"] != "folder":
+    if request.json["type"] != "project" and request.json["type"] != "folder":
         return Response(status=400)
 
-    name = request.form["name"]
-    parent = request.form["parent"]
+    name = request.json["name"]
+    parent = request.json["parent"]
 
-    is_folder = request.form["type"] == "folder"
+    is_folder = request.json["type"] == "folder"
 
     success, error = projects.add_project(username, parent, name, is_folder)
     if not success:
@@ -241,6 +241,38 @@ def new_project():
     full_path = os.path.join(parent, name) 
     first_path = "/projects/explorer" if is_folder else "/projects/editor"
     return redirect(os.path.join(first_path, full_path))
+
+@app.route("/api/project/new/git", methods=["POST"])
+def new_project_from_git():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    username = user["username"]
+
+    if "name" not in request.json:
+        return Response(status=400)
+    if "parent" not in request.json:
+        return Response(status=400)
+    if "repoUrl" not in request.json:
+        return Response(status=400)
+    if "pat" not in request.json:
+        return Response(status=400)
+    if "email" not in request.json:
+        return Response(status=400)
+
+    project_name = request.json["name"]
+    parent = request.json["parent"]
+    repo_url = request.json["repoUrl"]
+    pat = request.json["pat"]
+    email = request.json["email"]
+
+    success, error = projects.git_clone(username, parent, project_name,
+            repo_url, pat, email)
+    
+    if not success:
+        return Response(error, status=400)
+    return Response(status=200)
 
 @app.route("/api/project/delete", methods=["POST"])
 def delete_project():
