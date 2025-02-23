@@ -2,7 +2,7 @@ import * as pdf from "/projects/editor/pdf-viewer.js";
 import * as editor from "/projects/editor/code-editor.js";
 import * as fs from "/projects/editor/file-system.js";
 import * as compileErrors from "/projects/editor/compile-error-handler.js";
-import * as settings from "/settings.js";
+import * as settings from "/jsapis/settings.js";
 
 let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/projects/editor/".length);

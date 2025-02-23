@@ -1,7 +1,7 @@
 import * as fs from "/projects/editor/file-system.js";
 import * as latex_tokenizer from "/projects/editor/latex-tokenizer.js";
 import * as shortcuts from "/projects/editor/shortcuts.js";
-import * as settings from "/settings.js";
+import * as settings from "/jsapis/settings.js";
 
 let tokenizers = {
     ".tex": latex_tokenizer.tokenize,
