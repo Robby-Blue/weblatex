@@ -20,6 +20,10 @@ static_folders = [
         "files_path": ""
     },
     {
+        "url_path": "/jsapis",
+        "files_path": "jsapis"
+    },
+    {
         "url_path": "/login",
         "files_path": "login"
     },
