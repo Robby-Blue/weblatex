@@ -3,12 +3,14 @@ import os
 import subprocess
 
 def add_project(creator, parent_path, name, is_folder):
+    parent_path = normalize_path(parent_path)
+
     is_root_folder = name == ""
     if is_root_folder:
         if parent_path is not None:
             return False, "invalid name"
 
-    path = os.path.join("" if not parent_path else parent_path, name)
+    path = "" if not parent_path else parent_path + "/" + name
 
     is_valid_name = all(c.isalnum() or c in "_-" for c in name)
     if not is_valid_name:
@@ -31,6 +33,8 @@ def add_project(creator, parent_path, name, is_folder):
     return True, None
 
 def add_template(creator, project, template_name):
+    project = normalize_path(project)
+
     if not get_project(creator, project):
         return
     template_folder = os.path.join("templates", template_name)
@@ -45,6 +49,8 @@ def add_template(creator, project, template_name):
             f.write(content)
 
 def delete_project(creator, path):
+    path = normalize_path(path)
+
     fs_path = get_fs_path(creator, path, "")
 
     if get_project(creator, path):
@@ -62,11 +68,13 @@ def recursive_delete_db(creator, path):
 (creator, path))
 
 def get_projects(creator, parent_path):
+    parent_path = normalize_path(parent_path)
     return db.query(
 "SELECT * FROM Projects WHERE creator=%s AND parent_path=%s",
 (creator, parent_path))
 
 def get_project(creator, path, is_folder=None):
+    path = normalize_path(path)
     if is_folder is None:
         res = db.query(
 "SELECT * FROM Projects WHERE creator=%s AND path=%s",
@@ -191,6 +199,8 @@ def rename_file(creator, project, parent_path, old_name, new_name):
     return True, None
 
 def get_projects_with_parents(creator, project):
+    project = normalize_path(project)
+
     return db.query("""
 WITH RECURSIVE project_hierarchy AS (
     SELECT * 
@@ -209,6 +219,8 @@ SELECT * FROM project_hierarchy;
 """, (creator, project))
 
 def is_project_or_parent_git(creator, project_path):
+    project_path = normalize_path(project_path)
+
     projects = get_projects_with_parents(creator, project_path)
     if len(projects) == 0:
         return None, False
@@ -218,6 +230,8 @@ def is_project_or_parent_git(creator, project_path):
     return False, True
 
 def git_init(creator, project, git_name, git_email, git_token, repo_name):
+    project = normalize_path(project)
+    
     if not get_project(creator, project):
         return False, "project not found"
     if "." in repo_name:
@@ -254,6 +268,8 @@ WHERE creator=%s AND path=%s
     return True, None
 
 def git_commit(creator, project_path, commit_message):
+    project_path = normalize_path(project_path)
+
     project = get_project(creator, project_path)
     if not project:
         return False, "project not found"
@@ -276,6 +292,8 @@ def git_commit(creator, project_path, commit_message):
     return True, None
 
 def git_pull(creator, project_path):
+    project_path = normalize_path(project_path)
+
     project = get_project(creator, project_path)
     if not project:
         return False, "project not found"
@@ -298,6 +316,8 @@ def git_pull(creator, project_path):
     return True, None
 
 def git_diff(creator, project_path):
+    project_path = normalize_path(project_path)
+    
     project = get_project(creator, project_path)
     if not project:
         return None, "project not found"
@@ -313,12 +333,14 @@ def git_diff(creator, project_path):
     return out, None
 
 def git_clone(creator, parent_path, project_name, repo_url, pat, email):
+    parent_path = normalize_path(parent_path)
+    
     # basics
     project = get_project(creator, parent_path)
     if not project:
         return False, "parent not found"
     
-    path = os.path.join("" if not parent_path else parent_path, project_name)
+    path = "" if not parent_path else parent_path +"/"+ project_name
 
     is_valid_name = all(c.isalnum() or c in "_-" for c in project_name)
     if not is_valid_name:
@@ -401,6 +423,9 @@ def discover_cloned_projects(creator, path):
     discovered_projects += sub_projects
 
     return discovered_projects    
+
+def normalize_path(path):
+    return path.removesuffix("/")
 
 def get_fs_path(creator, project, file_path):
     user_path = get_rel_path("compiler_workspace", creator)
