@@ -43,6 +43,12 @@ async function openFolder(path) {
         return await res.json();
     });
 
+    if (data.hasOwnProperty("error")) {
+        if (data.error == "exists_as_folder") {
+            window.location = `/projects/explorer/${projectPath}`;
+        }
+    }
+
     filePickerElement.innerHTML = "";
 
     data.sort((a, b) => {

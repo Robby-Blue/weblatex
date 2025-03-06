@@ -117,6 +117,12 @@ async function listProjects(path) {
     let res = await fetch(`/api/projects?${queryString}`);
     let data = await res.json();
 
+    if (data.hasOwnProperty("error")) {
+        if (data.error == "exists_as_project") {
+            window.location = `/projects/editor/${path}`;
+        }
+    }
+
     let projectsListDiv = document.getElementById("project-list");
     projectsListDiv.innerHTML = "";
     for (let project of data) {
