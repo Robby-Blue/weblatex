@@ -156,9 +156,11 @@ def projects_list_api():
     user = users.get_token(token)
     if not user:
         return Response(status=401)
-    project = projects.get_project(user["username"], path, is_folder=True)
+    project = projects.get_project(user["username"], path)
     if not project:
         return Response(status=400)
+    if not project["is_folder"]:
+        return {"error": "exists_as_project"}, 400
     return projects.get_projects(user["username"], path)
 
 @app.route("/login/", methods=["POST"])
@@ -307,8 +309,8 @@ def get_files():
     
     value, error = projects.get_files(user["username"], project, path)
     if error:
-        return Response(error, status=400)
-    return value
+        return error, 400
+    return value, 200
 
 @app.route("/api/projects/files/", methods=["POST"])
 def upload_file():

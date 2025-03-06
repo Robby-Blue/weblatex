@@ -87,11 +87,14 @@ def get_project(creator, path, is_folder=None):
         return None
     return res[0]
 
-def get_files(creator, project, path):
-    if not get_project(creator, project, is_folder=False):
+def get_files(creator, project_path, path):
+    project =  get_project(creator, project_path)
+    if not project:
         return False, "project not found"
+    if project["is_folder"]:
+        return False, {"error": "exists_as_folder"}
 
-    fs_path = get_fs_path(creator, project, path)
+    fs_path = get_fs_path(creator, project_path, path)
 
     if not fs_path:
         return False, "bad path"
