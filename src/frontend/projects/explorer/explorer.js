@@ -165,4 +165,8 @@ function getProjectName(project) {
     return projectName;
 }
 
+function viewGit() {
+    window.location = `/projects/git/${path}`;
+}
+
 listProjects(path);
