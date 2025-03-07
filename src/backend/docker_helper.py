@@ -65,7 +65,7 @@ def has_container(sid):
 
 def kill_container(sid):
     container = containers[sid]
-    container.kill()
+    container["container"].kill()
 
 def compile_latex(sid):
     container = containers[sid]

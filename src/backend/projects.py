@@ -60,6 +60,60 @@ def delete_project(creator, path):
     if os.path.exists(fs_path):
         recursive_delete(fs_path)
 
+def move_project(creator, path, new_path):
+    path = normalize_path(path)
+    new_path = normalize_path(new_path)
+
+    if not get_project(creator, path):
+        return False, "path not found"
+    if get_project(creator, new_path):
+        return False, "new path already exists"
+    
+    if "/" in new_path:
+        new_parent = normalize_path(new_path[:new_path.rindex("/")])
+        if not get_project(creator, new_parent):
+            return False, "new parent doesnt exist"
+    else:
+        new_parent = ""
+
+    if "/" in path:
+        parent = normalize_path(path[:path.rindex("/")])
+    else:
+        parent = ""
+
+    fs_path = get_fs_path(creator, path, "")
+    new_fs_path = get_fs_path(creator, new_path, "")
+
+    os.rename(fs_path, new_fs_path)
+
+    # update parents
+    db.execute("""UPDATE Projects
+SET parent_path = CONCAT(%s, SUBSTRING(parent_path, LENGTH(%s) + 1))
+WHERE path = %s AND creator = %s;""",
+(new_parent, parent, path, creator))
+
+    if new_parent != "" and parent == "":
+        new_parent += "/"
+
+    db.execute("""UPDATE Projects
+SET parent_path = CONCAT(%s, SUBSTRING(parent_path, LENGTH(%s) + 1))
+WHERE path LIKE %s AND creator = %s;""",
+(new_parent, parent, path+"/%", creator))
+
+    # update sub folders
+    db.execute("""UPDATE Projects
+SET parent_path = CONCAT(%s, SUBSTRING(parent_path, LENGTH(%s) + 1))
+WHERE (parent_path = %s OR parent_path LIKE %s) AND
+creator = %s;""",
+(new_path, path, path, path+"/%", creator))
+
+    # update paths
+    db.execute("""UPDATE Projects
+SET path = CONCAT(%s, SUBSTRING(path, LENGTH(%s) + 1))
+WHERE (path = %s OR path LIKE %s) AND
+creator = %s;""",
+(new_path, path, path, path+"/%", creator))
+
 def recursive_delete_db(creator, path):
     path = normalize_path(path)
 
@@ -286,14 +340,14 @@ def git_commit(creator, project_path, commit_message):
     p = subprocess.Popen(["git", "add", "."],
         cwd=fs_path)
     if p.wait():
-        return False, p.returncode
+        return False, f"git add {p.returncode}"
     p = subprocess.Popen(["git", "commit", "-am", commit_message],
         cwd=fs_path)
     if p.wait():
-        return False, p.returncode
-    subprocess.Popen(["git", "push", "-u", "origin", "main"], cwd=fs_path)
+        return False, f"git commit {p.returncode}"
+    p = subprocess.Popen(["git", "push", "-u", "origin", "main"], cwd=fs_path)
     if p.wait():
-        return False, p.returncode
+        return False, f"git push {p.returncode}"
     
     return True, None
 
