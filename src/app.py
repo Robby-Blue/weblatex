@@ -293,6 +293,22 @@ def delete_project():
     projects.delete_project(username, path)
     return Response(status=200)
 
+@app.route("/api/project/move", methods=["POST"])
+def move_project():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    username = user["username"]
+    if "path" not in request.json:
+        return Response(status=400)
+    if "new_path" not in request.json:
+        return Response(status=400)
+    path = request.json["path"]
+    new_path = request.json["new_path"]
+    projects.move_project(username, path, new_path)
+    return Response(status=200)
+
 @app.route("/api/projects/files/")
 def get_files():
     if "project" not in request.args:

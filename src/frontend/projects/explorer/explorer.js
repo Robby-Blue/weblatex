@@ -109,7 +109,7 @@ newPathBlank.addEventListener("keypress", async function (event) {
     await fetch("/api/project/move", {
         method: "POST",
         body: JSON.stringify({
-            name: currentContextProject.path,
+            path: currentContextProject.path,
             new_path: newPathBlank.value,
         }),
         headers: {
