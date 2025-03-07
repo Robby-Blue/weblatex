@@ -10,9 +10,19 @@
 </head>
 <body>
     <div class="popup" id="popup">
+        <div id="new-div">
+            <h1>new</h1>
+            <button onclick="onCreateClicked('project')">project</button>
+            <button onclick="onCreateClicked('folder')">folder</button>
+            <button onclick="onCreateClicked('git')">from github</button>
+        </div>
         <div id="new-file-div">
             <h1 id="name-label">name</h1>
             <input id="name-field-blank" class="name-field" type="text" placeholder="name">
+        </div>
+        <div id="move-file-div">
+            <h1>move</h1>
+            <input id="new-path-field" class="name-field" type="text" placeholder="new path">
         </div>
         <div id="from-git-div">
             <h1 id="name-label">from github</h1>
@@ -24,7 +34,8 @@
         </div>
         <div id="context-div">
             <h1 id="project-context-label"></h1>
-            <button id="project-delete-button">delete</button>
+            <button onclick="onMoveClicked()">move</button>
+            <button onclick="onDeleteClicked()">delete</button>
         </div>
     </div>
     <div class="center-container">
@@ -32,9 +43,7 @@
             <p id="folder-label"></p>
             <div>
                 <button onclick="viewGit()">view git</button>
-                <button onclick="onCreateClicked('git')">from gh</button>
-                <button onclick="onCreateClicked('folder')">new folder</button>
-                <button onclick="onCreateClicked('project')">new project</button>
+                <button onclick="showPopup('new');">new</button>
             </div>
         </div>
         <div id="project-list"></div>
