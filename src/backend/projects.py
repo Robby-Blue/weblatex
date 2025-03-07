@@ -10,7 +10,8 @@ def add_project(creator, parent_path, name, is_folder):
         if parent_path is not None:
             return False, "invalid name"
 
-    path = "" if not parent_path else parent_path + "/" + name
+    path = ("" if not parent_path else parent_path) + "/" + name
+    path = normalize_path(path)
 
     is_valid_name = all(c.isalnum() or c in "_-" for c in name)
     if not is_valid_name:
@@ -60,6 +61,8 @@ def delete_project(creator, path):
         recursive_delete(fs_path)
 
 def recursive_delete_db(creator, path):
+    path = normalize_path(path)
+
     projects = db.query("SELECT path FROM Projects WHERE creator=%s AND parent_path=%s",
 (creator, path))
     for project in projects:
@@ -343,7 +346,8 @@ def git_clone(creator, parent_path, project_name, repo_url, pat, email):
     if not project:
         return False, "parent not found"
     
-    path = "" if not parent_path else parent_path +"/"+ project_name
+    path = ("" if not parent_path else parent_path) + "/" + project_name
+    path = normalize_path(path)
 
     is_valid_name = all(c.isalnum() or c in "_-" for c in project_name)
     if not is_valid_name:
@@ -389,7 +393,10 @@ def git_clone(creator, parent_path, project_name, repo_url, pat, email):
     new_projects = discover_cloned_projects(creator, path)
 
     for new_project in new_projects:
-        new_path, is_project, new_parent = new_project 
+        new_path, is_project, new_parent = new_project
+        new_path = normalize_path(new_path)
+        new_parent = normalize_path(new_parent)
+
         db.execute(
 "INSERT INTO Projects (creator, path, parent_path, is_folder) VALUES (%s, %s, %s, %s)",
 (creator, new_path, new_parent, not is_project))
@@ -428,7 +435,7 @@ def discover_cloned_projects(creator, path):
     return discovered_projects    
 
 def normalize_path(path):
-    return path.removesuffix("/")
+    return path.removesuffix("/").removeprefix("/")
 
 def get_fs_path(creator, project, file_path):
     user_path = get_rel_path("compiler_workspace", creator)

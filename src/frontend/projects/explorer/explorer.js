@@ -7,18 +7,16 @@ pathLabelElement.innerText = "/" + path;
 
 let popupElement = document.getElementById("popup");
 
-let newBlankDiv = document.getElementById("new-file-div");
 let nameLabel = document.getElementById("name-label");
 let nameFieldBlank = document.getElementById("name-field-blank");
 
-let fromGitDiv = document.getElementById("from-git-div");
 let localNameField = document.getElementById("local-name-field");
 let repoUrlField = document.getElementById("gh-link-field");
 let ghEmailField = document.getElementById("gh-email-field");
 let ghPATField = document.getElementById("gh-pat-field");
 let cloneButton = document.getElementById("gh-clone-button");
 
-let contextDiv = document.getElementById("context-div");
+let newPathBlank = document.getElementById("new-path-field");
 
 let createType;
 
@@ -26,15 +24,10 @@ function onCreateClicked(type) {
     nameLabel.innerText = `new ${type}`;
     createType = type;
 
-    popupElement.classList.add("visible");
-    contextDiv.classList.add("invisible");
-
     if (type == "git") {
-        newBlankDiv.classList.add("invisible");
-        fromGitDiv.classList.remove("invisible");
+        showPopup("from-git");
     } else {
-        newBlankDiv.classList.remove("invisible");
-        fromGitDiv.classList.add("invisible");
+        showPopup("new-file");
     }
 
     nameFieldBlank.focus();
@@ -56,7 +49,7 @@ nameFieldBlank.addEventListener("keypress", async function (event) {
         },
     });
 
-    popupElement.classList.remove("visible");
+    hidePopup();
     listProjects(path);
 });
 
@@ -77,22 +70,18 @@ cloneButton.addEventListener("click", async function (event) {
         },
     });
 
-    popupElement.classList.remove("visible");
+    hidePopup();
     listProjects(path);
 });
 
 function showProjectContextMenu() {
-    popupElement.classList.add("visible");
-    newBlankDiv.classList.add("invisible");
-    fromGitDiv.classList.add("invisible");
-    contextDiv.classList.remove("invisible");
+    showPopup("context");
 
     let nameLabel = document.getElementById("project-context-label");
     nameLabel.innerText = getProjectName(currentContextProject);
 }
 
-let deleteProjectButton = document.getElementById("project-delete-button");
-deleteProjectButton.addEventListener("click", async (event) => {
+async function onDeleteClicked(event) {
     await fetch(`/api/project/delete`, {
         method: "POST",
         body: JSON.stringify({
@@ -104,12 +93,37 @@ deleteProjectButton.addEventListener("click", async (event) => {
     });
 
     listProjects(path);
-    popupElement.classList.remove("visible");
+    hidePopup();
+}
+
+async function onMoveClicked(event) {
+    showPopup("move-file");
+    newPathBlank.value = currentContextProject.path;
+    newPathBlank.focus();
+}
+
+newPathBlank.addEventListener("keypress", async function (event) {
+    if (event.key != "Enter") return;
+    event.preventDefault();
+
+    await fetch("/api/project/move", {
+        method: "POST",
+        body: JSON.stringify({
+            name: currentContextProject.path,
+            new_path: newPathBlank.value,
+        }),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    hidePopup();
+    listProjects(path);
 });
 
 document.addEventListener("mousedown", (event) => {
     if (popup.contains(event.target)) return;
-    popupElement.classList.remove("visible");
+    hidePopup();
 });
 
 async function listProjects(path) {
@@ -167,6 +181,19 @@ function getProjectName(project) {
 
 function viewGit() {
     window.location = `/projects/git/${path}`;
+}
+
+function showPopup(visiblePartName) {
+    popupElement.classList.add("visible");
+    for (let child of popupElement.children) {
+        child.classList.add("invisible");
+    }
+    let visiblePart = document.getElementById(visiblePartName + "-div");
+    visiblePart.classList.remove("invisible");
+}
+
+function hidePopup() {
+    popupElement.classList.remove("visible");
 }
 
 listProjects(path);
