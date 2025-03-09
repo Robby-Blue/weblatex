@@ -1,5 +1,6 @@
 from backend import db
 import os
+import time
 import subprocess
 
 def add_project(creator, parent_path, name, is_folder):
@@ -341,13 +342,16 @@ def git_commit(creator, project_path, commit_message):
         cwd=fs_path)
     if p.wait():
         return False, f"git add {p.returncode}"
+    time.sleep(0.1)
     p = subprocess.Popen(["git", "commit", "-am", commit_message],
         cwd=fs_path)
     if p.wait():
         return False, f"git commit {p.returncode}"
+    time.sleep(0.1)
     p = subprocess.Popen(["git", "push", "-u", "origin", "main"], cwd=fs_path)
     if p.wait():
         return False, f"git push {p.returncode}"
+    time.sleep(0.1)
     
     return True, None
 
