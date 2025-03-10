@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS Tokens(
         
         self.execute("""
 CREATE TABLE IF NOT EXISTS Projects(
-    path VARCHAR(50) NOT NULL,
+    path VARCHAR(128) NOT NULL,
     is_folder BOOL NOT NULL,
-    parent_path VARCHAR(50),
+    parent_path VARCHAR(128),
     creator VARCHAR(20) NOT NULL,
     is_git BOOL DEFAULT FALSE NOT NULL,
     FOREIGN KEY (creator) REFERENCES Users(username)
