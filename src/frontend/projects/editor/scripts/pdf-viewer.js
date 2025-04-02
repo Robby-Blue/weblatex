@@ -1,7 +1,7 @@
 let { pdfjsLib } = globalThis;
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://unpkg.com/pdfjs-dist@4.6.82/legacy/build/pdf.worker.min.mjs";
+    "/dependencies/pdfjs/pdf.worker.min.mjs";
 
 const pdfjsWorker = new pdfjsLib.PDFWorker();
 

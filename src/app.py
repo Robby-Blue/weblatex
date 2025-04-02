@@ -583,6 +583,10 @@ def set_settings():
 
     return Response(status=200)
 
+@app.route("/dependencies/<path:dependency>")
+def dependencies(dependency):
+    return send_from_directory('dependencies', dependency)
+
 @socketio.on('connect')
 def handle_connect():
     pass
