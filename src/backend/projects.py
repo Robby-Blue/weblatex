@@ -493,6 +493,8 @@ def discover_cloned_projects(creator, path):
     return discovered_projects    
 
 def normalize_path(path):
+    if not path:
+        return path
     return path.removesuffix("/").removeprefix("/")
 
 def get_fs_path(creator, project, file_path):
