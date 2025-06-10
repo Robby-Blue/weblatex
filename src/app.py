@@ -28,6 +28,10 @@ static_folders = [
         "files_path": "login"
     },
     {
+        "url_path": "/dashboard",
+        "files_path": "dashboard"
+    },
+    {
         "url_path": "/projects/explorer/*",
         "files_path": "projects/explorer"
     },
@@ -115,7 +119,7 @@ def index():
     token = request.cookies.get("token")
 
     if token and users.get_token(token):
-        return redirect("/projects/explorer")
+        return redirect("/dashboard")
     else:
         return redirect("/login")
 
@@ -178,6 +182,15 @@ def login():
         return r
     else:
         return redirect("/")
+
+@app.route("/api/account/")
+def get_account():
+    token = request.cookies.get("token", None)
+    user = users.get_user_from_token(token)
+    return jsonify({
+        "username": user["username"],
+        "is_admin": bool(user["is_admin"])
+    })
     
 @app.route("/change-password/", methods=["POST"])
 def change_password():
