@@ -254,12 +254,7 @@ editorDiv.addEventListener("focusout", () => {
 
 editorDiv.addEventListener("keydown", (event) => {
     lastKey = event.key;
-    if (event.ctrlKey && event.code == "Space") {
-        let openShortcutField = document.getElementById("open-shortcut-field");
-        openShortcutField.focus();
-    }
-
-    if (event.ctrlKey && event.code == "Space") {
+    if (event.ctrlKey && event.key == "e") {
         let openShortcutField = document.getElementById("open-shortcut-field");
         openShortcutField.focus();
     }

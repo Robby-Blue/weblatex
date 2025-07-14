@@ -53,6 +53,20 @@ ${tableRows}
   return src;
 }
 
+function vector(src, pos, kwargs) {
+  if (kwargs.n < 0) {
+    return false;
+  }
+
+  let innerCode = "v \\\\ ".repeat(kwargs.n).slice(0, -4);
+
+  let text = `\\begin{pmatrix} ${innerCode} \\end{pmatrix}`
+
+  src = insertText(src, pos, text);
+  src = addPackage("amsmath", src);
+  return src;
+}
+
 function toggledarkmode(src, _, _2) {
   src = addPackage("darkmode", src);
   if (!src.includes("\\enabledarkmode")) {
@@ -126,6 +140,17 @@ let shortcuts = [
       },
     ],
     func: matrix,
+  },
+  {
+    name: "vector",
+    description: "create a vector with <n> values",
+    arguments: [
+      {
+        name: "n",
+        default: 3,
+      }
+    ],
+    func: vector,
   },
   {
     name: "toggledarkmode",
