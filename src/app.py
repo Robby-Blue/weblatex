@@ -472,12 +472,10 @@ def git_status(project):
 
     username = user["username"]
 
-    is_git, exists = projects.is_project_or_parent_git(username, project)
+    git_status, exists = projects.get_project_or_parents_git(username, project)
 
     if exists:
-        return jsonify({
-            "isGit": is_git
-        })
+        return jsonify(git_status)
     else:
         return Response(status=404)
 

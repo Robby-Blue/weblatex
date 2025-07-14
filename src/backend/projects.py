@@ -279,16 +279,19 @@ WITH RECURSIVE project_hierarchy AS (
 SELECT * FROM project_hierarchy;
 """, (creator, project))
 
-def is_project_or_parent_git(creator, project_path):
+def get_project_or_parents_git(creator, project_path):
     project_path = normalize_path(project_path)
 
     projects = get_projects_with_parents(creator, project_path)
     if len(projects) == 0:
-        return None, False
+        return {"is_git": False}, False
     for project in projects:
         if project["is_git"]:
-            return True, True
-    return False, True
+            return {
+                "is_git": True,
+                "path": project["path"]
+            }, True
+    return {"is_git": False}, True
 
 def git_init(creator, project, git_name, git_email, git_token, repo_name):
     project = normalize_path(project)
@@ -297,7 +300,7 @@ def git_init(creator, project, git_name, git_email, git_token, repo_name):
         return False, "project not found"
     if "." in repo_name:
         return False, "bad repo name"
-    if is_project_or_parent_git(creator, project)[0]:
+    if get_project_or_parents_git(creator, project)[0]["is_git"]:
         return False, "already in git"
     
     fs_path = get_fs_path(creator, project, "")
@@ -412,7 +415,7 @@ def git_clone(creator, parent_path, project_name, repo_url, pat, email):
         return False, "invalid name"
     if get_project(creator, path):
         return False, "project already exists"
-    if is_project_or_parent_git(creator, parent_path)[0]:
+    if get_project_or_parents_git(creator, parent_path)[0]["is_git"]:
         return False, "already in git"
 
     # parse url

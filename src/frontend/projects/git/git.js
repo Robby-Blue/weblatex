@@ -79,7 +79,12 @@ async function loadPage() {
 
     let data = await r.json();
 
-    if (data.isGit) {
+    if (data.is_git) {
+        if (data.path != projectPath) {
+            window.location = `/projects/git/${data.path}`
+            return
+        }
+
         let commitForm = document.getElementById("commit-git-form");
         commitForm.classList.remove("hidden");
 
