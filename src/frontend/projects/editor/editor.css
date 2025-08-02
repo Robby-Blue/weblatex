@@ -3,7 +3,8 @@ body {
     height: 100vh;
 }
 
-p, pre {
+p,
+pre {
     margin: 0;
     white-space: pre-wrap;
     word-break: keep-all
@@ -15,14 +16,42 @@ button.red {
 
 .container {
     width: 100vw;
-    display: flex;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.waybar {
+    padding: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.waybar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.float-parent {
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    padding-top: 0px;
+    flex-grow: 1;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.floating-container {
+    border: #EEEEEE 1px solid;
 }
 
 .file-picker {
-    background-color: rgb(20, 20, 20);
-    width: 200px;
-    height: 100vh;
+    background-color: #1f1f1f;
+    width: 400px;
     overflow-y: scroll;
     overflow-x: hidden;
     display: flex;
@@ -54,31 +83,14 @@ button.red {
     border: none;
 }
 
-.options-header {
-    background-color: rgb(41, 41, 41);
-    width: 100%;
-    position: static;
-    top: 0;
-    padding-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-
-    > button, * > button {
-        padding: 6px;
-        margin-left: 2px;
-        margin-right: 2px;
-    }
-}
-
 .shortcut-field {
-    width: 50%;
+    width: 200px;
     background-color: rgb(20, 20, 20);
     color: white;
     outline: none;
     border: none;
-    border-radius: 8px;
     padding: 4px;
-    margin-top: 4px;
+    border-radius: 0px;
     box-sizing: border-box;
 }
 
@@ -89,9 +101,8 @@ button.red {
 .popup {
     visibility: hidden;
     position: absolute;
-    user-select: none;
     background-color: #1f1f1f;
-    border-radius: 16px;
+    border: #EEEEEE 1px solid;
     padding: 16px;
     width: 50%;
     height: 50%;
@@ -122,39 +133,46 @@ button.red {
 }
 
 .code-container {
-    height: 100vh;
+    background-color: #1f1f1f;
     width: 50%;
     flex-grow: 1;
-    overflow: hidden;
+    overflow: scroll;
 }
 
 #editor {
     font-family: "Consolas", "Courier New", Courier, monospace;
-    height: 100vh;
     outline: none;
     overflow: scroll;
+    padding: 4px;
 
     .syntax-default {
         color: #EEEEEE
     }
+
     .syntax-command {
         color: #c586c0
     }
+
     .syntax-brackets {
         color: #dcdcaa
     }
+
     .syntax-inlinemath {
         color: #4ec9b0
     }
+
     .syntax-math {
         color: #9cdcfe
     }
+
     .syntax-comment {
         color: #3e7f65
     }
+
     .line {
         min-height: 1em;
     }
+
     .highlight-error {
         outline: red 1px solid;
     }
@@ -162,10 +180,9 @@ button.red {
 
 /* pdf */
 .output-container {
-    min-width: 50%;
-    background-color: rgb(20, 20, 20);
+    min-width: calc(50vw - 20px);
+    background-color: #1f1f1f;
     position: relative;
-    height: 100vh;
     overflow: hidden;
 
     display: flex;
@@ -191,7 +208,7 @@ button.red {
     position: absolute;
     user-select: none;
     background-color: #1f1f1f;
-    border-radius: 16px;
+    border: #EEEEEE 1px solid;
     padding: 16px;
     inset: 0;
     margin: 32px;

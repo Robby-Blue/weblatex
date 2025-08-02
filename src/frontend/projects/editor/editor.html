@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
   <script src="/projects/editor/script.js" type="module"></script>
   <script src="/dependencies/socketio/socket.io.min.js"></script>
 </head>
+
 <body>
   <div class="context-menu" id="file-context-popup">
     <button id="file-context-delete">delete</button>
@@ -20,49 +22,55 @@
     <div class="shortcuts-content" id="shortcuts-content"></div>
   </div>
   <div class="container">
-    <div class="file-picker">
+    <div class="waybar">
       <div>
-        <p class="current-path-text"></p>
-        <hr>
-      </div>
-      <div class="files-list"></div>
-      <div>
-      <hr>
-      </div>
-      <div class="files-controls">
-        <button id="upload-file-button">upload file</button>
-        <button id="create-file-button">new file</button>
-        <button id="create-folder-button">new folder</button>
-      </div>
-    </div>
-    <div class="code-container">
-      <div class="options-header">
-        <button>Settings</button>
-        <input id="open-shortcut-field" class="shortcut-field" type="text" placeholder="shortcut">
-        <button id="compile-button">Compile</button>
-      </div>
-      <pre><div id="editor" spellcheck="false" contenteditable="true"></div></pre>
-    </div>
-    <div class="output-container">
-      <div class="options-header">
         <button id="download-button">Download</button>
         <a target="_blank" rel="noopener noreferrer" id="view-pdf-link"><button>view</button></a>
       </div>
-      <div class="pdf-container">
-        <div id="pages-container" class="pages-container"></div>
-        <div id="compile-error-popup" class="compile-error-popup">
-          <div class="compile-parsed-error">
-            <h1 id="compile-error-title"></h1>
-            <p id="compile-error-full-error"></p>
-          </div>
-          <button id="compile-error-line"></button>
-          <div>
-            <h2>log</h2>
-            <p id="compile-error-log"></p>
+      <div class="waybar-center">
+        <input id="open-shortcut-field" class="shortcut-field" type="text" placeholder="shortcut">
+      </div>
+      <div>
+        <button id="compile-button">Compile</button>
+      </div>
+    </div>
+    <div class="float-parent">
+      <div class="file-picker floating-container">
+        <div>
+          <p class="current-path-text"></p>
+          <hr>
+        </div>
+        <div class="files-list"></div>
+        <div>
+          <hr>
+        </div>
+        <div class="files-controls">
+          <button id="upload-file-button">upload file</button>
+          <button id="create-file-button">new file</button>
+          <button id="create-folder-button">new folder</button>
+        </div>
+      </div>
+      <div class="code-container floating-container">
+        <pre><div id="editor" spellcheck="false" contenteditable="true"></div></pre>
+      </div>
+      <div class="output-container floating-container">
+        <div class="pdf-container">
+          <div id="pages-container" class="pages-container"></div>
+          <div id="compile-error-popup" class="compile-error-popup">
+            <div class="compile-parsed-error">
+              <h1 id="compile-error-title"></h1>
+              <p id="compile-error-full-error"></p>
+            </div>
+            <button id="compile-error-line"></button>
+            <div>
+              <h2>log</h2>
+              <p id="compile-error-log"></p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </body>
+
 </html>
