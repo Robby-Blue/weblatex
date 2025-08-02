@@ -70,10 +70,14 @@ button.red {
     flex-grow: 1;
 }
 
+hr {
+    margin: 0;
+}
+
 .files-controls {
     display: flex;
-    flex-direction: column;
     align-items: start;
+    justify-content: space-between;
 }
 
 .name-field {

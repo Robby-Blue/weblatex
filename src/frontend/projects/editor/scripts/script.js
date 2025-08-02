@@ -61,6 +61,18 @@ button("download-button", async (event) => {
     anchorElement.click();
 });
 
+let parentPath = projectPath
+if (parentPath.endsWith("/")) {
+    parentPath = parentPath.substring(0, parentPath.length - 1)
+}
+parentPath = parentPath.substring(0, parentPath.lastIndexOf("/"))
+
+let parentFolderLinkElement = document.getElementById("parent-folder-link");
+parentFolderLinkElement.setAttribute("href", `/projects/explorer/${parentPath}`);
+
+let gitLinkElement = document.getElementById("git-link");
+gitLinkElement.setAttribute("href", `/projects/git/${parentPath}`);
+
 let viewLinkElement = document.getElementById("view-pdf-link");
 viewLinkElement.setAttribute("href", `/projects/view/${projectPath}`);
 
