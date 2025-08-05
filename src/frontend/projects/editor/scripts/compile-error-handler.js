@@ -1,4 +1,5 @@
 let popupDiv = document.getElementById("compile-error-popup");
+let popupPackground = document.getElementById("compile-popup-background");
 let titleElement = document.getElementById("compile-error-title");
 let goToLineButton = document.getElementById("compile-error-line");
 let fullErrorElement = document.getElementById("compile-error-full-error");
@@ -23,9 +24,11 @@ export function onCompileResult(data) {
 
   if (wasSuccessful) {
     popupDiv.classList.remove("visible");
+    popupPackground.classList.remove("visible")
     return;
   }
   popupDiv.classList.add("visible");
+  popupPackground.classList.add("visible")
   log.innerText = data.log;
 
   if (wasTimeout) {

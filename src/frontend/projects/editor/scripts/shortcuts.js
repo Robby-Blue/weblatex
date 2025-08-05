@@ -1,3 +1,4 @@
+let popupBackground = document.getElementById("popup-background")
 let shortcutsPopup = document.getElementById("shortcuts-popup");
 let shortcutsContent = document.getElementById("shortcuts-content");
 let openShortcutField = document.getElementById("open-shortcut-field");
@@ -268,19 +269,18 @@ function parseArguments(query, args) {
 
 openShortcutField.addEventListener("focusin", (event) => {
   shortcutField.value = "";
-  shortcutsPopup.classList.add("visible");
-  shortcutField.focus();
+  showPopup()
   showShortcuts("");
 });
 
 shortcutField.addEventListener("focusout", (event) => {
-  shortcutField.value = "";
-  shortcutsPopup.classList.remove("visible");
+  hidePopup();
 });
 
 shortcutField.addEventListener("keyup", (event) => {
   if (event.key === "Escape") {
-    shortcutsPopup.classList.remove("visible");
+    hidePopup();
+    return;
   }
   if (event.key === "Enter") {
     let results = searchShortcuts(shortcutField.value);
@@ -297,9 +297,19 @@ shortcutField.addEventListener("keyup", (event) => {
     let shortcutFunc = shortcut.func;
 
     executeShortcut_cb(shortcutFunc, parsedArgs.kwargs);
-    shortcutField.value = "";
-    shortcutsPopup.classList.remove("visible");
+    hidePopup();
+    return
   }
 
   showShortcuts(event.target.value);
 });
+
+function hidePopup() {
+  shortcutField.value = "";
+  popupBackground.classList.remove("visible")
+}
+
+function showPopup() {
+  popupBackground.classList.add("visible")
+  shortcutField.focus();
+}

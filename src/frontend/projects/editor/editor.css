@@ -10,6 +10,10 @@ pre {
     word-break: keep-all
 }
 
+button {
+    white-space: nowrap;
+}
+
 button.red {
     background-color: rgb(250, 91, 91);
 }
@@ -29,12 +33,6 @@ button.red {
     justify-content: space-between;
 }
 
-.waybar-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
 .float-parent {
     display: flex;
     gap: 8px;
@@ -51,9 +49,6 @@ button.red {
 
 .file-picker {
     background-color: #1f1f1f;
-    width: 400px;
-    overflow-y: scroll;
-    overflow-x: hidden;
     display: flex;
     flex-direction: column;
 
@@ -78,6 +73,7 @@ hr {
     display: flex;
     align-items: start;
     justify-content: space-between;
+    gap: 2px;
 }
 
 .name-field {
@@ -102,11 +98,24 @@ hr {
     width: 100%;
 }
 
-.popup {
+.popup-background {
     visibility: hidden;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popup-background.absolute {
+    position: absolute;
+}
+
+.popup-background.visible {
+    visibility: visible;
+}
+
+.popup {
     position: absolute;
     background-color: #1f1f1f;
-    border: #EEEEEE 1px solid;
     padding: 16px;
     width: 50%;
     height: 50%;
@@ -186,7 +195,6 @@ hr {
 .output-container {
     min-width: calc(50vw - 20px);
     background-color: #1f1f1f;
-    position: relative;
     overflow: hidden;
 
     display: flex;
@@ -195,7 +203,13 @@ hr {
 
 .pdf-container {
     overflow-y: auto;
-    flex-grow: 1;
+    /* flex-grow: 1; */
+    display: grid;
+}
+
+.pages-container,
+#compile-popup-background {
+    grid-area: 1 / 1;
 }
 
 .pages-container {
@@ -209,12 +223,10 @@ hr {
 
 .compile-error-popup {
     visibility: hidden;
-    position: absolute;
-    user-select: none;
+    box-sizing: border-box;
     background-color: #1f1f1f;
-    border: #EEEEEE 1px solid;
+    height: calc(100% - 64px);
     padding: 16px;
-    inset: 0;
     margin: 32px;
     display: flex;
     flex-direction: column;

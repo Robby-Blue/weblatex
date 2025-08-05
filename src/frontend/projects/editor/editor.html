@@ -17,18 +17,20 @@
     <button id="file-context-delete">delete</button>
     <button id="file-context-rename">rename</button>
   </div>
-  <div class="popup" id="shortcuts-popup">
-    <input id="shortcut-field" class="shortcut-field full" type="text" placeholder="shortcut">
-    <div class="shortcuts-content" id="shortcuts-content"></div>
+  <div id="popup-background" class="popup-background absolute">
+    <div class="popup floating-container" id="shortcuts-popup">
+      <input id="shortcut-field" class="shortcut-field full" type="text" placeholder="shortcut">
+      <div class="shortcuts-content" id="shortcuts-content"></div>
+    </div>
   </div>
   <div class="container">
     <div class="waybar">
       <div>
         <a id="parent-folder-link"><button>folder</button></a>
         <a id="git-link"><button>git</button></a>
-        <button id="compile-button">compile</button>
       </div>
       <div class="waybar-center">
+        <button id="compile-button">compile</button>
         <input id="open-shortcut-field" class="shortcut-field" type="text" placeholder="shortcut">
       </div>
       <div>
@@ -58,15 +60,18 @@
       <div class="output-container floating-container">
         <div class="pdf-container">
           <div id="pages-container" class="pages-container"></div>
-          <div id="compile-error-popup" class="compile-error-popup">
-            <div class="compile-parsed-error">
-              <h1 id="compile-error-title"></h1>
-              <p id="compile-error-full-error"></p>
-            </div>
-            <button id="compile-error-line"></button>
-            <div>
-              <h2>log</h2>
-              <p id="compile-error-log"></p>
+
+          <div id="compile-popup-background" class="popup-background">
+            <div id="compile-error-popup" class="compile-error-popup floating-container">
+              <div class="compile-parsed-error">
+                <h1 id="compile-error-title"></h1>
+                <p id="compile-error-full-error"></p>
+              </div>
+              <button id="compile-error-line"></button>
+              <div>
+                <h2>log</h2>
+                <p id="compile-error-log"></p>
+              </div>
             </div>
           </div>
         </div>
