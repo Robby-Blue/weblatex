@@ -180,6 +180,19 @@ def login():
         return r
     else:
         return redirect("/")
+    
+@app.route("/logout/")
+def logout():
+    token = request.cookies.get("token", None)
+    user = users.get_token(token)
+    if not user:
+        return Response(status=401)
+    users.invalidate_token(user["username"], token)
+
+    r = redirect("/login")
+    r.set_cookie("token", "deleted", httponly=True, samesite="Strict")
+
+    return r
 
 @app.route("/api/account/")
 def get_account():
