@@ -1,0 +1,17 @@
+{
+    "name": "weblatex",
+    "short_name": "weblatex",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#292929",
+    "theme_color": "#EEEEEE",
+    "description": "simple latex, on the web",
+    "icons": [
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}
