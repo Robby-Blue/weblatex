@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>git</title>
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="/menu.css">
-  <link rel="stylesheet" href="/projects/git.css">
-  <script src="/projects/git.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico">
+
+    <title>git</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/menu.css">
+    <link rel="stylesheet" href="/projects/git.css">
+    <script src="/projects/git.js" defer></script>
 </head>
+
 <body>
     <div class="center-container">
         <h1>git</h1>
@@ -23,8 +27,7 @@
             <input id="token" name="token" type="password"><br>
             <label for="repo">repo name</label><br>
             <input id="repo" name="repo"><br>
-            <input type="submit"
-                value="init" >
+            <input type="submit" value="init">
         </form>
 
         <form action="/api/projects/git/commit/" method="POST" class="hidden" id="commit-git-form">
@@ -33,8 +36,7 @@
             <input id="commit-project" name="project" class="hidden">
             <label for="message">commit message</label><br>
             <input id="message" name="message"><br>
-            <input type="submit"
-                value="commit" >
+            <input type="submit" value="commit">
         </form>
 
         <div id="diff-area">
@@ -45,8 +47,7 @@
             <h2>pull</h2>
             <p>this will undo any uncommited changes</p>
             <input id="pull-project" name="project" class="hidden">
-            <input type="submit"
-                value="pull" >
+            <input type="submit" value="pull">
         </form>
 
         <div id="error-area" class="hidden">
@@ -54,4 +55,5 @@
         </div>
     </div>
 </body>
+
 </html>

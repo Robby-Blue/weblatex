@@ -103,17 +103,15 @@ for folder in static_folders:
         if not os.path.isfile(file_path):
             continue
 
-        print(url_path, file_path)
-
         mimetype, _ = mimetypes.guess_type(file_name)
 
-        with open(file_path, "r") as f:
+        with open(file_path, "rb") as f:
             static_files.append({
                 "url_path": url_path,
                 "mimetype": mimetype,
                 "content": f.read()
             })
-
+    
 @app.route("/")
 def index():
     token = request.cookies.get("token")
