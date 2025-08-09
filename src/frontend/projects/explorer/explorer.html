@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div class="popup" id="popup">
+    <div class="popup floating-container" id="popup">
         <div id="new-div">
             <h1>new</h1>
             <button onclick="onCreateClicked('project')">project</button>
@@ -43,14 +43,15 @@
             <button onclick="onDeleteClicked()">delete</button>
         </div>
     </div>
-    <div class="center-container floating-container">
-        <div class="folder-container">
-            <p id="folder-label"></p>
-            <div>
-                <button onclick="viewGit()">view git</button>
-                <button onclick="showPopup('new');">new</button>
-            </div>
+    <div class="waybar">
+        <div class="waybar-island" id="parent-island">
         </div>
+        <div class="waybar-island">
+            <a id="git-link" class="button">view git</a>
+            <button onclick="showPopup('new');">new</button>
+        </div>
+    </div>
+    <div class="center-container floating-container">
         <div id="project-list"></div>
     </div>
 </body>

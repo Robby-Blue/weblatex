@@ -1,16 +1,17 @@
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
     overflow: hidden;
     margin: 0;
 }
 
 .center-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     padding: 16px;
     margin: auto;
-    margin-inline: auto;
     height: 70vh;
     width: 70vw;
 }

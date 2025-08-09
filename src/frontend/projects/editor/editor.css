@@ -25,14 +25,6 @@ button.red {
     flex-direction: column;
 }
 
-.waybar {
-    padding: 16px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-}
-
 .float-parent {
     display: flex;
     gap: 8px;

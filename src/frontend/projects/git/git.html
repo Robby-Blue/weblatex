@@ -14,6 +14,13 @@
 </head>
 
 <body>
+    <div class="waybar">
+        <div class="waybar-island">
+            <button onclick="history.back();">back</button>
+            <a class="button" id="folder-button" href="/">folder</a>
+            <a class="button" href="/dashboard">dashboard</a>
+        </div>
+    </div>
     <div class="center-container floating-container">
         <h1>git</h1>
         <form action="/api/projects/git/init/" method="POST" class="hidden" id="init-git-form">

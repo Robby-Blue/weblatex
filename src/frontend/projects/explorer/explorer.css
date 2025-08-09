@@ -1,27 +1,16 @@
-body {
-    overflow: hidden;
-}
-
-.folder-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 32px;
-}
-
 p {
     margin: 0;
 }
 
 a {
     text-decoration: none;
+    color: white;
 }
 
 .popup {
     visibility: hidden;
     position: absolute;
     user-select: none;
-    background-color: #1f1f1f;
-    border-radius: 16px;
     padding: 16px;
     width: 50%;
     height: fit-content;
@@ -39,6 +28,7 @@ a {
 
 .popup.visible {
     visibility: visible;
+    z-index: 1;
 }
 
 .invisible {

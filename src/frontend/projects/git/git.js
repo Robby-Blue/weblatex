@@ -104,4 +104,6 @@ async function loadPage() {
     }
 }
 
+document.getElementById("folder-button").href = `/projects/explorer/${projectPath}`
+
 loadPage();

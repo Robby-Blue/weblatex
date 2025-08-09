@@ -1,9 +1,7 @@
 let currentContextProject;
-let pathLabelElement = document.getElementById("folder-label");
 
 let path = decodeURIComponent(window.location.pathname);
 path = path.substring("/projects/explorer/".length);
-pathLabelElement.innerText = "/" + path;
 
 let popupElement = document.getElementById("popup");
 
@@ -179,10 +177,6 @@ function getProjectName(project) {
     return projectName;
 }
 
-function viewGit() {
-    window.location = `/projects/git/${path}`;
-}
-
 function showPopup(visiblePartName) {
     popupElement.classList.add("visible");
     for (let child of popupElement.children) {
@@ -196,4 +190,36 @@ function hidePopup() {
     popupElement.classList.remove("visible");
 }
 
+function fillParentIsland(path) {
+    if (path.endsWith("/")) {
+        path = path.substring(0, path.length - 1)
+    }
+    let parts = path.split("/")
+
+    let parentIsland = document.getElementById("parent-island")
+
+    for (let i = 0; i < parts.length; i++) {
+        let slashJoined = parts.slice(0, i).join("/")
+        let slashLink = `/projects/explorer/${slashJoined}`
+
+        if (i == 0) {
+            slashLink = "/projects/explorer/"
+        }
+
+        let nameJoined = parts.slice(0, i + 1).join("/")
+        let nameLink = `/projects/explorer/${nameJoined}`
+
+        let slashElement = document.createElement("a")
+        slashElement.innerText = "/"
+        slashElement.href = slashLink
+        parentIsland.appendChild(slashElement)
+        let nameElement = document.createElement("a")
+        nameElement.innerText = parts[i]
+        nameElement.href = nameLink
+        parentIsland.appendChild(nameElement)
+    }
+}
+
+document.getElementById("git-link").href = `/projects/git/${path}`
+fillParentIsland(path);
 listProjects(path);
