@@ -43,10 +43,6 @@ button.red {
     box-sizing: border-box;
 }
 
-.floating-container {
-    border: #EEEEEE 1px solid;
-}
-
 .file-picker {
     background-color: #1f1f1f;
     display: flex;

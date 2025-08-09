@@ -1,13 +1,6 @@
-body {
-    margin: 0;
-}
-
 .center-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 256px);
-    padding-top: 128px;
-    padding-bottom: 128px;
 }
 
 #filler {

@@ -1,7 +1,18 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+}
+
 .center-container {
-    padding-top: 128px;
+    padding: 16px;
+    margin: auto;
     margin-inline: auto;
-    width: 50%;
+    height: 70vh;
+    width: 70vw;
 }
 
 h1 {

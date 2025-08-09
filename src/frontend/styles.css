@@ -1,19 +1,36 @@
 html {
     background-color: rgb(41, 41, 41);
+    margin: 0;
 }
 
-h1, h2, h3 {
+.floating-container {
+    outline: #EEEEEE 1px solid;
+    background-color: #1f1f1f;
+}
+
+h1,
+h2,
+h3 {
     margin-top: 0;
 }
 
-h1, h2, h3, p, label {
+h1,
+h2,
+h3,
+p,
+label {
     font-family: Arial, Helvetica, sans-serif;
     color: rgb(228, 228, 228);
 }
 
-input[type=submit], button {
+input[type=submit],
+button {
     border-radius: 0;
     border: none;
     padding: 4px;
     background-color: rgb(91, 206, 250);
+}
+
+button {
+    color: black;
 }

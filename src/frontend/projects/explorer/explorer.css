@@ -2,12 +2,6 @@ body {
     overflow: hidden;
 }
 
-.center-container {
-    margin: auto;
-    width: 50%;
-    margin-top: 128px;
-}
-
 .folder-container {
     display: flex;
     justify-content: space-between;
@@ -19,7 +13,7 @@ p {
 }
 
 a {
-	text-decoration: none;
+    text-decoration: none;
 }
 
 .popup {
@@ -34,7 +28,7 @@ a {
     inset: 0;
     margin: auto;
 
-    > h1 {
+    >h1 {
         margin: 0;
     }
 
