@@ -84,3 +84,33 @@ socket.emit("start", { project: projectPath });
 socket.on("sid", (data) => {
     sid = data.sid;
 });
+
+function toggleVisible(id) {
+    let element = document.getElementById(id)
+    // collapse to make it lose its size, so a bit output doesnt
+    // make it scrollable
+    // position absolute removes it from the dom or whatever
+    // it gets rid of the extra gap
+    if (element.style.visibility == "collapse") {
+        element.style.visibility = "visible"
+        element.style.position = "relative"
+    } else {
+        element.style.visibility = "collapse"
+        element.style.position = "absolute"
+    }
+}
+
+toggleVisible("file-picker")
+document.getElementById("float-parent").addEventListener("click", (e) => {
+    if (e.target != document.getElementById("float-parent"))
+        return;
+
+    let x = e.pageX
+    let percent = x / window.innerWidth;
+    if (percent < 0.25) {
+        toggleVisible("file-picker")
+    }
+    if (percent > 0.75) {
+        toggleVisible("output-container")
+    }
+});

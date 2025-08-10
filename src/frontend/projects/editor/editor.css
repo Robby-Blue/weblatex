@@ -97,8 +97,12 @@ hr {
     position: absolute;
 }
 
-.popup-background.visible {
-    visibility: visible;
+div[style*="visibility: hidden"]>*>.popup-background.visible {
+    visibility: hidden;
+}
+
+div[style*="visibility: hidden"]>*>*>.compile-error-popup {
+    visibility: hidden;
 }
 
 .popup {
