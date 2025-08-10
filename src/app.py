@@ -452,7 +452,13 @@ def compile_pdf():
         return Response(status=400)
     sid = data["sid"]
 
-    return_code, log = docker.compile_latex(sid)
+    http_error, compile_res = docker.compile_latex(sid)
+
+    if http_error:
+        status_code, error_message = (http_error)
+        return jsonify({"error": error_message}), status_code
+
+    return_code, log = compile_res
 
     return jsonify({
         "return_code": return_code,

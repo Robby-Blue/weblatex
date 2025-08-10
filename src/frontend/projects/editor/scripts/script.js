@@ -18,11 +18,23 @@ function button(id, cb) {
 pdf.renderPDF();
 
 async function updatePDF() {
+    if (sid == undefined) {
+        // assume disconnected, docker was killed
+        connectWebSocket(updatePDF)
+        return
+    }
+
     let data = { sid: sid };
     let queryString = new URLSearchParams(data).toString();
     let res = await fetch(`/api/projects/compile?${queryString}`, {
         method: "POST",
     });
+
+    if (res.status == 404) {
+        // assume disconnected, docker was killed
+        connectWebSocket(updatePDF)
+        return
+    }
 
     let resData = await res.json();
     compileErrors.onCompileResult(resData);
@@ -79,11 +91,18 @@ viewLinkElement.setAttribute("href", `/projects/view/${projectPath}`);
 let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;
 
-let socket = io.connect(socketUrl);
-socket.emit("start", { project: projectPath });
-socket.on("sid", (data) => {
-    sid = data.sid;
-});
+function connectWebSocket(cb) {
+    let socket = io.connect(socketUrl, {
+        reconnection: false
+    });
+    socket.emit("start", { project: projectPath });
+    socket.on("sid", (data) => {
+        sid = data.sid;
+        if (cb) {
+            cb()
+        }
+    });
+}
 
 function toggleVisible(id) {
     let element = document.getElementById(id)

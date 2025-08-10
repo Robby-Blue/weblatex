@@ -68,6 +68,9 @@ def kill_container(sid):
     container["container"].kill()
 
 def compile_latex(sid):
+    if sid not in containers:
+        return (404, "container sid not found"), None
+    
     container = containers[sid]
     compile_timeout = container["compile_timeout"]
     res = container["container"].exec_run(["timeout", str(compile_timeout), "pdflatex", "--shell-escape", "-interaction=nonstopmode",
@@ -77,4 +80,4 @@ def compile_latex(sid):
     code = res.exit_code
     output = res.output.decode("UTF-8")
 
-    return code, output
+    return None, (code, output)
