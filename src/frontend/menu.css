@@ -1,10 +1,10 @@
 body {
     height: 100vh;
-    overflow: hidden;
     margin: 0;
 }
 
 .center-container {
+    overflow-y: scroll;
     position: absolute;
     left: 0;
     right: 0;
