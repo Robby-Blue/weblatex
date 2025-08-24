@@ -46,7 +46,10 @@ def start_container(sid, username, project_path):
 
     container = docker_client.containers.run(image_name, detach=True, tty=True,
         mounts=[mnt],
-        network_disabled=True
+        network_disabled=True,
+        cpu_period=100000,
+        cpu_quota=50000,
+        cpuset_cpus="0"
     )
     # this runs it as root
     # because it needs root to write the output pdf
@@ -72,6 +75,13 @@ def compile_latex(sid):
         return (404, "container sid not found"), None
     
     container = containers[sid]
+    
+    # required to get latest state
+    container["container"].reload()
+    state = container["container"].attrs["State"]
+    if state["Running"] == False:
+        return (404, "container not running"), None
+    
     compile_timeout = container["compile_timeout"]
     res = container["container"].exec_run(["timeout", str(compile_timeout), "pdflatex", "--shell-escape", "-interaction=nonstopmode",
         "-halt-on-error", "-output-directory=.", "main.tex"],
