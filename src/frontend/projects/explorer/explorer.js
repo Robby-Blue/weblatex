@@ -154,14 +154,32 @@ async function listProjects(path) {
         projectLinkElement.setAttribute("href", projectHref);
         projectLinkElement.appendChild(projectLabelElement);
 
-        projectLinkElement.addEventListener("contextmenu", (event) => {
-            event.preventDefault();
-            currentContextProject = project;
-            showProjectContextMenu(event);
-            return false;
-        });
+        addContextMenuListener(projectLinkElement, project)
         projectsListDiv.append(projectLinkElement);
     }
+}
+
+function addContextMenuListener(element, project) {
+    let pressTimer;
+
+    element.addEventListener("touchstart", e => {
+        // iOS decided to be weird
+        pressTimer = setTimeout(() => {
+            currentContextProject = project;
+            showProjectContextMenu(element);
+            return false;
+        }, 500);
+        e.preventDefault()
+    });
+    element.addEventListener("touchend", () => clearTimeout(pressTimer));
+    element.addEventListener("touchmove", () => clearTimeout(pressTimer));
+
+    element.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        currentContextProject = project;
+        showProjectContextMenu(event);
+        return false;
+    });
 }
 
 function getProjectName(project) {
