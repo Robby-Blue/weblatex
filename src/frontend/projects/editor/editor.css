@@ -185,7 +185,7 @@ div[style*="visibility: hidden"]>*>*>.compile-error-popup {
 
 /* pdf */
 .output-container {
-    min-width: calc(50vw - 20px);
+    width: calc(50vw - 20px);
     background-color: #1f1f1f;
     overflow: hidden;
 
@@ -194,17 +194,26 @@ div[style*="visibility: hidden"]>*>*>.compile-error-popup {
 }
 
 .pdf-container {
+    overflow-x: hidden;
     overflow-y: auto;
-    /* flex-grow: 1; */
     display: grid;
+    margin: 0px;
 }
 
 .pages-container,
 #compile-popup-background {
     grid-area: 1 / 1;
+    margin: 0px;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+#compile-popup-background {
+    z-index: 1;
 }
 
 .pages-container {
+    width: 100%;
     overflow-x: hidden;
 
     canvas {
@@ -218,6 +227,7 @@ div[style*="visibility: hidden"]>*>*>.compile-error-popup {
     box-sizing: border-box;
     background-color: #1f1f1f;
     height: calc(100% - 64px);
+    width: calc(100% - 64px);
     padding: 16px;
     margin: 32px;
     display: flex;

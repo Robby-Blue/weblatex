@@ -52,3 +52,7 @@ button {
 button {
     color: black;
 }
+
+::-webkit-scrollbar {
+    display: none;
+}

@@ -74,10 +74,13 @@ let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;
 
 function connectWebSocket(cb) {
+    if (socket && socket.connected) {
+        socket.disconnect();
+    }
+
     socket = io.connect(socketUrl, {
         reconnection: false
     });
-    socket.emit("start", { project: projectPath });
     socket.on("started", (data) => {
         if (cb) {
             cb()
@@ -97,6 +100,7 @@ function connectWebSocket(cb) {
 
         compileButton.classList.remove("red");
     });
+    socket.emit("start", { project: projectPath });
 }
 
 function toggleVisible(id) {
