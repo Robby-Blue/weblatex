@@ -6,7 +6,7 @@ import * as settings from "/jsapis/settings.js";
 
 let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/projects/editor/".length);
-let sid = undefined;
+let socket = undefined
 
 let compileButton = document.getElementById("compile-button");
 
@@ -18,31 +18,13 @@ function button(id, cb) {
 pdf.renderPDF();
 
 async function updatePDF() {
-    if (sid == undefined) {
+    if (socket == undefined) {
         // assume disconnected, docker was killed
         connectWebSocket(updatePDF)
         return
     }
 
-    let data = { sid: sid };
-    let queryString = new URLSearchParams(data).toString();
-    let res = await fetch(`/api/projects/compile?${queryString}`, {
-        method: "POST",
-    });
-
-    if (res.status == 404) {
-        // assume disconnected, docker was killed
-        connectWebSocket(updatePDF)
-        return
-    }
-
-    let resData = await res.json();
-    compileErrors.onCompileResult(resData);
-
-    if (res.status != 200) return;
-    pdf.renderPDF();
-
-    compileButton.classList.remove("red");
+    socket.emit("compile")
 }
 
 editor.onSave(async (src) => {
@@ -92,15 +74,28 @@ let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;
 
 function connectWebSocket(cb) {
-    let socket = io.connect(socketUrl, {
+    socket = io.connect(socketUrl, {
         reconnection: false
     });
     socket.emit("start", { project: projectPath });
-    socket.on("sid", (data) => {
-        sid = data.sid;
+    socket.on("started", (data) => {
         if (cb) {
             cb()
         }
+    });
+    socket.on("compiled", (data) => {
+        if (data.error) {
+            // assume disconnected, docker was killed
+            connectWebSocket(updatePDF)
+            return
+        }
+
+        compileErrors.onCompileResult(data);
+
+        if (data.return_code != 0) return;
+        pdf.renderPDF();
+
+        compileButton.classList.remove("red");
     });
 }
 

@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+import eventlet.queue
 from flask import Flask, Response, send_from_directory, request, jsonify, redirect
 from flask_socketio import SocketIO, emit
 import os
@@ -13,6 +16,8 @@ docker.init()
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
+
+job_queue = eventlet.queue.Queue()
 
 static_folders = [
     {
@@ -111,7 +116,31 @@ for folder in static_folders:
                 "mimetype": mimetype,
                 "content": f.read()
             })
-    
+
+def worker():
+    while True:
+        sid = job_queue.get()
+        
+        try:
+            http_error, compile_res = docker.compile_latex(sid)
+
+            if http_error:
+                socketio.emit("compiled", {"error": http_error}, to=sid)
+                return
+
+            return_code, log = compile_res
+            
+            socketio.emit("compiled", {
+                "error": None,
+                "return_code": return_code,
+                "log": log
+            }, to=sid)
+        except:
+            pass
+        job_queue.task_done()
+        
+socketio.start_background_task(worker) 
+        
 @app.route("/")
 def index():
     token = request.cookies.get("token")
@@ -445,26 +474,6 @@ def rename_file():
         return Response(error, status=400)
     return Response(status=200)
 
-@app.route("/api/projects/compile", methods=["POST"])
-def compile_pdf():
-    data = request.args
-    if "sid" not in data:
-        return Response(status=400)
-    sid = data["sid"]
-
-    http_error, compile_res = docker.compile_latex(sid)
-
-    if http_error:
-        status_code, error_message = (http_error)
-        return jsonify({"error": error_message}), status_code
-
-    return_code, log = compile_res
-
-    return jsonify({
-        "return_code": return_code,
-        "log": log
-    }), 200 if return_code == 0 else 400
-
 @app.route("/api/projects/pdf/<path:project>")
 def get_project_pdf(project):
     token = request.cookies.get("token", None)
@@ -646,7 +655,12 @@ def handle_message(message):
     if not success:
         return
 
-    emit("sid", {"sid": request.sid})
+    emit("started")
+    
+@socketio.on('compile')
+def handle_compile():
+    sid = request.sid
+    job_queue.put(sid)
 
 def handle_sigterm(*args):
     socketio.stop()
