@@ -90,6 +90,11 @@ function toggledarkmode(src, _, _2) {
   return src;
 }
 
+function usepackage(src, pos, kwargs) {
+  src = addPackage(kwargs.name, src);
+  return src;
+}
+
 function addPackage(packageName, src) {
   if (!src.includes(`\\usepackage{${packageName}}`)) {
     let docPos = src.indexOf("documentclass");
@@ -158,6 +163,17 @@ let shortcuts = [
     description: "toggle darkmode",
     arguments: [],
     func: toggledarkmode,
+  },
+  {
+    name: "package",
+    description: "adds a new usepackage declaration",
+    arguments: [
+      {
+        name: "name",
+        type: "str"
+      }
+    ],
+    func: usepackage,
   },
 ];
 
@@ -247,14 +263,18 @@ function parseArguments(query, args) {
     }
 
     let token = tokens[index];
-    // add other types later if needed
-    let value = Number.parseInt(token);
-    if (isNaN(value)) {
-      if (!arg.default) {
-        anyMissing = true;
+    let value;
+    if (!arg.hasOwnProperty("type") || arg.type == "int") {
+      value = Number.parseInt(token);
+      if (isNaN(value)) {
+        if (!arg.default) {
+          anyMissing = true;
+        }
+        index += 1;
+        continue;
       }
-      index += 1;
-      continue;
+    } else if (arg.type == "str") {
+      value = token
     }
     parsedArgs[arg.name] = value;
 
