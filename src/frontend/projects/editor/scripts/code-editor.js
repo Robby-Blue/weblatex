@@ -248,7 +248,7 @@ export function onSave(cb) {
     save_cb = cb;
 }
 
-editorDiv.addEventListener("focusout", () => {
+editorDiv.addEventListener("keyup", () => {
     selectionAbsOffset = getAbsoluteCaretPosition(editorDiv);
 });
 
