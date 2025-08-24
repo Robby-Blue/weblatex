@@ -160,20 +160,20 @@ async function listProjects(path) {
 }
 
 function addContextMenuListener(element, project) {
-    let pressTimer;
+    let startTime = undefined;
 
     element.addEventListener("touchstart", e => {
         // iOS decided to be weird
-        pressTimer = setTimeout(() => {
-            e.preventDefault();
-            currentContextProject = project;
-            showProjectContextMenu(element);
-            return false;
-        }, 500);
-        e.preventDefault()
+        startTime = Date.now()
     });
-    element.addEventListener("touchend", () => clearTimeout(pressTimer));
-    element.addEventListener("touchmove", () => clearTimeout(pressTimer));
+    element.addEventListener("touchend", () => {
+        let msPassed = Date.now() - startTime
+        if (msPassed < 500) {
+            return
+        }
+        currentContextProject = project;
+        showProjectContextMenu(element);
+    });
 
     element.addEventListener("contextmenu", (event) => {
         event.preventDefault();
