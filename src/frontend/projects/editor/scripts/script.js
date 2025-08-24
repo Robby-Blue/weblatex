@@ -18,7 +18,7 @@ function button(id, cb) {
 pdf.renderPDF();
 
 async function updatePDF() {
-    if (socket == undefined) {
+    if (socket == undefined || !socket.connected) {
         // assume disconnected, docker was killed
         connectWebSocket(updatePDF)
         return
