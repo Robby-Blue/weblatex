@@ -165,6 +165,7 @@ function addContextMenuListener(element, project) {
     element.addEventListener("touchstart", e => {
         // iOS decided to be weird
         pressTimer = setTimeout(() => {
+            e.preventDefault();
             currentContextProject = project;
             showProjectContextMenu(element);
             return false;
