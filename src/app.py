@@ -126,7 +126,7 @@ def worker():
 
             if http_error:
                 socketio.emit("compiled", {"error": http_error}, to=sid)
-                return
+                continue
 
             return_code, log = compile_res
             
