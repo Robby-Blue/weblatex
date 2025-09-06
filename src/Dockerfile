@@ -18,4 +18,4 @@ RUN wget https://registry.npmjs.org/socket.io/-/socket.io-4.0.0.tgz -O socket.io
 
 COPY . .
 
-CMD [ "python", "-u", "app.py" ]
+CMD [ "python", "app.py" ]

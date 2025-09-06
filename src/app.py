@@ -178,12 +178,13 @@ def static_file(path):
     return Response(response=found["content"],
         mimetype=found["mimetype"])
 
-@app.route("/api/projects/")
+@app.route("/api/projects")
 def projects_list_api():
     if "path" not in request.args:
         return Response(status=400)
     path = request.args["path"]
     token = request.cookies.get("token", None)
+
     user = users.get_token(token)
     if not user:
         return Response(status=401)
@@ -194,7 +195,7 @@ def projects_list_api():
         return {"error": "exists_as_project"}, 400
     return projects.get_projects(user["username"], path)
 
-@app.route("/login/", methods=["POST"])
+@app.route("/login", methods=["POST"])
 def login():
     if "username" not in request.form:
         return Response(status=400)
@@ -210,7 +211,7 @@ def login():
     else:
         return redirect("/")
     
-@app.route("/logout/")
+@app.route("/logout")
 def logout():
     token = request.cookies.get("token", None)
     user = users.get_token(token)
@@ -223,7 +224,7 @@ def logout():
 
     return r
 
-@app.route("/api/account/")
+@app.route("/api/account")
 def get_account():
     token = request.cookies.get("token", None)
     user = users.get_user_from_token(token)
@@ -232,7 +233,7 @@ def get_account():
         "is_admin": bool(user["is_admin"])
     })
     
-@app.route("/change-password/", methods=["POST"])
+@app.route("/change-password", methods=["POST"])
 def change_password():
     if "password" not in request.form:
         return Response(status=400)
@@ -243,7 +244,7 @@ def change_password():
     users.change_password(user["username"], request.form["password"])
     return redirect("/")
 
-@app.route("/invalidate-tokens/", methods=["POST"])
+@app.route("/invalidate-tokens", methods=["POST"])
 def invalidate_tokens():
     token = request.cookies.get("token", None)
     user = users.get_token(token)
@@ -256,7 +257,7 @@ def invalidate_tokens():
     r.set_cookie("token", new_token, httponly=True, samesite="Strict", max_age=315360000)
     return r
 
-@app.route("/create-account/", methods=["POST"])
+@app.route("/create-account", methods=["POST"])
 def create_account():
     if "username" not in request.form:
         return Response(status=400)
@@ -271,7 +272,7 @@ def create_account():
     users.add_user(request.form["username"], request.form["password"])
     return redirect("/")
 
-@app.route("/api/project/new/", methods=["POST"])
+@app.route("/api/project/new", methods=["POST"])
 def new_project():
     token = request.cookies.get("token", None)
     user = users.get_token(token)
@@ -362,7 +363,7 @@ def move_project():
     projects.move_project(username, path, new_path)
     return Response(status=200)
 
-@app.route("/api/projects/files/")
+@app.route("/api/projects/files")
 def get_files():
     if "project" not in request.args:
         return Response(status=400)
@@ -381,7 +382,7 @@ def get_files():
         return error, 400
     return value, 200
 
-@app.route("/api/projects/files/", methods=["POST"])
+@app.route("/api/projects/files", methods=["POST"])
 def upload_file():
     if "text" not in request.json:
         return Response(status=400)
@@ -505,7 +506,7 @@ def git_status(project):
     else:
         return Response(status=404)
 
-@app.route("/api/projects/git/init/", methods=["POST"])
+@app.route("/api/projects/git/init", methods=["POST"])
 def git_init():
     token = request.cookies.get("token", None)
     user = users.get_token(token)
@@ -530,7 +531,7 @@ def git_init():
 
     return redirect("/projects/git/"+project)
 
-@app.route("/api/projects/git/commit/", methods=["POST"])
+@app.route("/api/projects/git/commit", methods=["POST"])
 def git_commit():
     token = request.cookies.get("token", None)
     user = users.get_token(token)
@@ -551,7 +552,7 @@ def git_commit():
 
     return redirect("/projects/git/"+project)
 
-@app.route("/api/projects/git/pull/", methods=["POST"])
+@app.route("/api/projects/git/pull", methods=["POST"])
 def git_pull():
     token = request.cookies.get("token", None)
     user = users.get_token(token)

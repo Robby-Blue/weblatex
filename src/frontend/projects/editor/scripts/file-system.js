@@ -146,7 +146,7 @@ async function uploadFile(path, content = null) {
 
     content = content.trim()
 
-    let res = await fetch(`/api/projects/files/`, {
+    let res = await fetch(`/api/projects/files`, {
         method: "POST",
         body: JSON.stringify({
             text: content,
