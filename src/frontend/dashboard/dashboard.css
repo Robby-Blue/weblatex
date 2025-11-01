@@ -19,3 +19,8 @@ a {
 #admin_links {
     margin-top: 32px;
 }
+
+.hbar {
+    display: flex;
+    justify-content: space-between;
+}

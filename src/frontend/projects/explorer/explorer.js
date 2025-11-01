@@ -154,7 +154,9 @@ async function listProjects(path) {
         projectLinkElement.setAttribute("href", projectHref);
         projectLinkElement.appendChild(projectLabelElement);
 
-        addContextMenuListener(projectLinkElement, project)
+        if (navigator.onLine) {
+            addContextMenuListener(projectLinkElement, project)
+        }
         projectsListDiv.append(projectLinkElement);
     }
 }
@@ -242,3 +244,10 @@ function fillParentIsland(path) {
 document.getElementById("git-link").href = `/projects/git/${path}`
 fillParentIsland(path);
 listProjects(path);
+
+if (!navigator.onLine) {
+    let onlies = document.querySelectorAll('[data-online-only]')
+    for (let only of onlies) {
+        only.style.visibility = "collapse"
+    }
+}

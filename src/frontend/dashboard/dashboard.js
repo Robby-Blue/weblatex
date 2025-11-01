@@ -16,4 +16,15 @@ loadDashboard()
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js", { scope: "/" })
+
+    let onlies = document.querySelectorAll('[data-sw-only]')
+    for (let only of onlies) {
+        only.style.visibility = "visible"
+    }
+}
+
+function reloadServiceWorkers() {
+    navigator.serviceWorker.getRegistration().then((reg) => {
+        reg.unregister().then(() => { window.location.reload(true); });
+    });
 }

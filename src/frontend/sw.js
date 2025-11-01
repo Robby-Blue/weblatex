@@ -15,12 +15,17 @@ const urlsToCache = [
 ];
 
 self.addEventListener("install", event => {
+    self.caches.delete(CACHE_NAME)
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
     );
 });
 
 self.addEventListener("fetch", event => {
+    if (event.request.method != "GET") {
+        return
+    }
+
     event.respondWith((async () => {
         const url = new URL(event.request.url);
         if (url.pathname == "/projects/explorer/" || url.pathname.startsWith("/projects/explorer/")) {
