@@ -119,8 +119,15 @@ for folder in static_folders:
 
 def worker():
     while True:
+        for i, job_sid in enumerate(list(job_queue.queue)):
+            socketio.emit("update_queue", {
+                "position": i
+            }, to=job_sid)
+
         sid = job_queue.get()
         
+        socketio.emit("start_compiling", to=sid)
+
         try:
             http_error, compile_res = docker.compile_latex(sid)
 

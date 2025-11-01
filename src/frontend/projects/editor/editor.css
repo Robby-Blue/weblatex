@@ -246,3 +246,16 @@ div[style*="visibility: hidden"]>*>*>.compile-error-popup {
 .compile-parsed-error {
     flex-grow: 1;
 }
+
+.compile-status-container {
+    grid-area: 1/1;
+    margin-bottom: auto;
+    /* fix height */
+    background-color: #1f1f1f;
+    visibility: collapse;
+}
+
+#compile-status-progress {
+    background-color: forestgreen;
+    padding: 2px;
+}

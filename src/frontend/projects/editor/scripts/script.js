@@ -9,6 +9,16 @@ let projectPath = pathName.substring("/projects/editor/".length);
 let socket = undefined
 
 let compileButton = document.getElementById("compile-button");
+let compileStatusContainer = document.getElementById("compile-status-container");
+let compileStatusProgress = document.getElementById("compile-status-progress");
+
+function setCompileStatusProgress(percent, text) {
+    compileStatusContainer.style.visibility = "visible"
+    compileStatusProgress.style.width = `${percent * 100}%`
+    if (text) {
+        compileStatusProgress.innerText = text
+    }
+}
 
 function button(id, cb) {
     let element = document.getElementById(id);
@@ -24,6 +34,7 @@ async function updatePDF() {
         return
     }
 
+    setCompileStatusProgress(1, "request")
     socket.emit("compile")
 }
 
@@ -43,6 +54,7 @@ editor.onSave(async (src) => {
 button("compile-button", async (event) => {
     compileButton.classList.add("red");
 
+    setCompileStatusProgress(0, "save")
     let success = await fs.uploadAllFiles();
     if (!success) return;
 
@@ -73,6 +85,31 @@ viewLinkElement.setAttribute("href", `/projects/view/${projectPath}`);
 let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
 let socketUrl = socketProtocol + location.host;
 
+let waitIntervalId = -1
+let startQueuePos = -1
+
+function updateQueuePos(data) {
+    if (startQueuePos == -1) {
+        startQueuePos = data.position
+    }
+
+    let absoluteDone = startQueuePos - data.position
+    let decimalDone = (absoluteDone) / startQueuePos
+    setCompileStatusProgress(decimalDone, `queue ${data.position}`)
+}
+
+function startCompiling(data) {
+    let timeoutSeconds = settings.getSetting("compile-timeout")
+    let timeoutMs = timeoutSeconds * 1000
+    let startTime = Date.now()
+
+    waitIntervalId = setInterval(() => {
+        let elapsedMs = Date.now() - startTime
+        console.log(elapsedMs, timeoutMs)
+        setCompileStatusProgress(elapsedMs / timeoutMs, "compiling")
+    }, 1 / 50);
+}
+
 function connectWebSocket(cb) {
     if (socket && socket.connected) {
         socket.disconnect();
@@ -83,16 +120,24 @@ function connectWebSocket(cb) {
     });
     socket.on("started", (data) => {
         if (cb) {
+            setCompileStatusProgress(1 / 2, "connected")
             cb()
         }
     });
+    socket.on("update_queue", updateQueuePos)
+    socket.on("start_compiling", startCompiling)
+
     socket.on("compiled", (data) => {
+        window.clearInterval(waitIntervalId)
+        startQueuePos = -1
+
         if (data.error) {
             // assume disconnected, docker was killed
             connectWebSocket(updatePDF)
             return
         }
 
+        compileStatusContainer.style.visibility = "collapse"
         compileErrors.onCompileResult(data);
 
         if (data.return_code != 0) return;
