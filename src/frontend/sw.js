@@ -15,10 +15,11 @@ const urlsToCache = [
 ];
 
 self.addEventListener("install", event => {
-    self.caches.delete(CACHE_NAME)
-    event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-    );
+    event.waitUntil((async () => {
+        await caches.delete(CACHE_NAME);
+        const cache = await caches.open(CACHE_NAME);
+        await cache.addAll(urlsToCache);
+    })());
 });
 
 self.addEventListener("fetch", event => {
