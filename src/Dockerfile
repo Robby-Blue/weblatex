@@ -16,6 +16,10 @@ RUN wget https://registry.npmjs.org/socket.io/-/socket.io-4.0.0.tgz -O socket.io
     tar -xzf socket.io.tgz --strip-components=2 -C dependencies/socketio package/client-dist/ && \
     rm socket.io.tgz
 
+COPY fonts_downloader.py .
+RUN mkdir -p dependencies/fonts && \
+    python fonts_downloader.py
+
 COPY . .
 
 CMD [ "python", "app.py" ]

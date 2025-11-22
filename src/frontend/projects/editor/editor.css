@@ -146,10 +146,13 @@ div[style*="visibility: hidden"]>*>*>.compile-error-popup {
 }
 
 #editor {
-    font-family: "Consolas", "Courier New", Courier, monospace;
     outline: none;
     overflow: scroll;
     padding: 4px;
+
+    >div>span {
+        font-family: "Roboto Mono", sans-serif;
+    }
 
     .syntax-default {
         color: #EEEEEE
