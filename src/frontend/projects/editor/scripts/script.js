@@ -88,6 +88,8 @@ let socketUrl = socketProtocol + location.host;
 let waitIntervalId = -1
 let startQueuePos = -1
 
+let compileStartTime = -1
+
 function updateQueuePos(data) {
     if (startQueuePos == -1) {
         startQueuePos = data.position
@@ -99,14 +101,17 @@ function updateQueuePos(data) {
 }
 
 function startCompiling(data) {
-    let timeoutSeconds = settings.getSetting("compile-timeout")
-    let timeoutMs = timeoutSeconds * 1000
+    compileStartTime = Date.now()
+
+    let timeoutMs = getCompileTime()
     let startTime = Date.now()
 
     waitIntervalId = setInterval(() => {
         let elapsedMs = Date.now() - startTime
-        console.log(elapsedMs, timeoutMs)
-        setCompileStatusProgress(elapsedMs / timeoutMs, "compiling")
+        let elapsedDecimal = elapsedMs / timeoutMs
+        let progress = 1 - (1 - elapsedDecimal) ** 2
+
+        setCompileStatusProgress(progress, "compiling")
     }, 1 / 50);
 }
 
@@ -137,6 +142,8 @@ function connectWebSocket(cb) {
             return
         }
 
+        saveCompileTime(Date.now() - compileStartTime)
+
         compileStatusContainer.style.visibility = "collapse"
         compileErrors.onCompileResult(data);
 
@@ -144,8 +151,28 @@ function connectWebSocket(cb) {
         pdf.renderPDF();
 
         compileButton.classList.remove("red");
+
     });
     socket.emit("start", { project: projectPath });
+}
+
+function getCompileTime(time) {
+    let timeoutSeconds = settings.getSetting("compile-timeout")
+    let timeoutMs = timeoutSeconds * 1000
+
+    const dataStr = localStorage.getItem("compileTimes");
+    if (dataStr == null) {
+        return timeoutMs
+    }
+    const times = JSON.parse(dataStr)
+    return times[pathName] || timeoutMs
+}
+
+function saveCompileTime(time) {
+    const dataStr = localStorage.getItem("compileTimes") || "{}";
+    const times = JSON.parse(dataStr)
+    times[pathName] = time
+    localStorage.setItem("compileTimes", JSON.stringify(times))
 }
 
 function toggleVisible(id) {
