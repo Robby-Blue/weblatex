@@ -1,10 +1,22 @@
-FROM python:3.9
+# --- build stage
+FROM alpine:latest AS builder
 
-WORKDIR /app/weblatex
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    build-base \
+    gcc \
+    python3-dev \
+    wget \
+    tar
+
+WORKDIR /app
+
+RUN python3 -m venv /venv
+ENV PATH="/venv/bin:$PATH"
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN git config --global init.defaultBranch main
 
 RUN wget https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-5.0.375.tgz -O pdfjs-dist.tgz && \
     mkdir -p dependencies/pdfjs && \
@@ -19,6 +31,20 @@ RUN wget https://registry.npmjs.org/socket.io/-/socket.io-4.0.0.tgz -O socket.io
 COPY fonts_downloader.py .
 RUN mkdir -p dependencies/fonts && \
     python fonts_downloader.py
+
+# --- runtime stage
+FROM alpine:latest
+
+RUN apk add --no-cache \
+    python3 \
+    git
+
+WORKDIR /app/weblatex
+COPY --from=builder /venv /venv
+COPY --from=builder /app/dependencies dependencies
+ENV PATH="/venv/bin:$PATH"
+
+RUN git config --global init.defaultBranch main
 
 COPY . .
 
