@@ -32,10 +32,10 @@ async function renderPage(page, canvas, parentWidth) {
     });
 }
 
-export function renderPDF() {
+export function renderPDF(url) {
     pdfjsLib
         .getDocument({
-            url: `/api/projects/pdf/${projectPath}`,
+            url: url,
             worker: pdfjsWorker,
         })
         .promise.then(async (pdf) => {

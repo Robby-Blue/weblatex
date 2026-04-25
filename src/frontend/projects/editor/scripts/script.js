@@ -4,6 +4,8 @@ import * as fs from "/projects/editor/file-system.js";
 import * as compileErrors from "/projects/editor/compile-error-handler.js";
 import * as settings from "/jsapis/settings.js";
 
+import { BusyTexRunner, XeLatex } from "/dependencies/node_modules/texlyre-busytex/dist/index.js";
+
 let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/projects/editor/".length);
 let socket = undefined
@@ -11,6 +13,23 @@ let socket = undefined
 let compileButton = document.getElementById("compile-button");
 let compileStatusContainer = document.getElementById("compile-status-container");
 let compileStatusProgress = document.getElementById("compile-status-progress");
+
+let compilationIsLocal = null
+let busytexRunner = null
+
+async function init() {
+    await settings.loadSettings()
+    compilationIsLocal = settings.getSetting("compile-locally")
+    if (compilationIsLocal) {
+        busytexRunner = new BusyTexRunner({
+            busytexBasePath: "/dependencies/busytex",
+            preloadDataPackages: ["/dependencies/busytex/texlive-recommended.js"],
+        });
+        await busytexRunner.initialize(true);
+    } else {
+        pdf.renderPDF(`/api/projects/pdf/${projectPath}`);
+    }
+}
 
 function setCompileStatusProgress(percent, text) {
     compileStatusContainer.style.visibility = "visible"
@@ -25,9 +44,13 @@ function button(id, cb) {
     element.addEventListener("click", cb);
 }
 
-pdf.renderPDF();
 
 async function updatePDF() {
+    if (compilationIsLocal) {
+        compileLocally()
+        return
+    }
+
     if (socket == undefined || !socket.connected) {
         // assume disconnected, docker was killed
         connectWebSocket(updatePDF)
@@ -36,6 +59,23 @@ async function updatePDF() {
 
     setCompileStatusProgress(1, "request")
     socket.emit("compile")
+}
+
+async function compileLocally() {
+    const xelatex = new XeLatex(busytexRunner);
+    const result = await xelatex.compile({
+        input: await fs.getFileContent("main.tex"),
+        additionalFiles: await fs.flattenFolder(".")
+    });
+
+    if (result.success && result.pdf) {
+        const blob = new Blob([result.pdf], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        pdf.renderPDF(url);
+
+        compileButton.classList.remove("red");
+        compileStatusContainer.style.visibility = "collapse"
+    }
 }
 
 editor.onSave(async (src) => {
@@ -148,7 +188,7 @@ function connectWebSocket(cb) {
         compileErrors.onCompileResult(data);
 
         if (data.return_code != 0) return;
-        pdf.renderPDF();
+        pdf.renderPDF(`/api/projects/pdf/${projectPath}`);
 
         compileButton.classList.remove("red");
 
@@ -204,3 +244,4 @@ document.getElementById("float-parent").addEventListener("click", (e) => {
         toggleVisible("output-container")
     }
 });
+await init()

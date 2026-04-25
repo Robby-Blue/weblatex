@@ -8,16 +8,23 @@ RUN apk add --no-cache \
     gcc \
     python3-dev \
     wget \
-    tar
+    tar \
+    npm
 
 WORKDIR /app
 
+RUN npm install texlyre-busytex && \
+    npx texlyre-busytex download-assets ./dependencies && \
+    cp -r node_modules dependencies/
+
+# -- install python libs
 RUN python3 -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# -- dl js deps
 RUN wget https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-5.0.375.tgz -O pdfjs-dist.tgz && \
     mkdir -p dependencies/pdfjs && \
     tar -xzf pdfjs-dist.tgz --strip-components=2 -C dependencies/pdfjs package/build/ && \
@@ -28,6 +35,7 @@ RUN wget https://registry.npmjs.org/socket.io/-/socket.io-4.0.0.tgz -O socket.io
     tar -xzf socket.io.tgz --strip-components=2 -C dependencies/socketio package/client-dist/ && \
     rm socket.io.tgz
 
+# -- dl fonts
 COPY fonts_downloader.py .
 RUN mkdir -p dependencies/fonts && \
     python fonts_downloader.py

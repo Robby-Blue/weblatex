@@ -19,6 +19,12 @@ default_settings = {
         "value": 5,
         "editable": False,
     },
+    "compile-locally": {
+        "name": "compile locally",
+        "type": "bool",
+        "value": False,
+        "editable": True,
+    },
 }
 
 def get_user_settings(username, is_admin=False):

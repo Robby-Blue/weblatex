@@ -36,12 +36,7 @@ async function openFolder(path) {
     let pathText = "~" + path.substr(1);
     currentPathElement.innerText = pathText;
 
-    let data = await getCached(folderCache, path, async () => {
-        let data = { path: path, project: projectPath };
-        let queryString = new URLSearchParams(data).toString();
-        let res = await fetch(`/api/projects/files?${queryString}`);
-        return await res.json();
-    });
+    let data = await getFolderData(path)
 
     if (data.hasOwnProperty("error")) {
         if (data.error == "exists_as_folder") {
@@ -103,8 +98,23 @@ function shouldSkipFile(file) {
     }
 }
 
+export async function getFolderData(path) {
+    let data = await getCached(folderCache, path, async () => {
+        let data = { path: path, project: projectPath };
+        let queryString = new URLSearchParams(data).toString();
+        let res = await fetch(`/api/projects/files?${queryString}`);
+        return await res.json();
+    });
+    return data
+}
+
 async function openFile(path) {
     currentFilePath = path;
+    let content = await getFileContent(path)
+    editor.updateSyntaxHighlight(content);
+}
+
+export async function getFileContent(path) {
     let file = await getCached(fileCache, path, async () => {
         let data = { path: path, project: projectPath };
         let queryString = new URLSearchParams(data).toString();
@@ -114,8 +124,28 @@ async function openFile(path) {
             synced: true,
         };
     });
-    editor.updateSyntaxHighlight(file.text);
+    return file.text
 }
+
+export async function flattenFolder(path = ".") {
+    let files = []
+    for (let file of await getFolderData(path)) {
+        let filePath = `${path}/${file.name}`
+
+        if (file.is_file) {
+            files.push({
+                path: filePath,
+                content: await getFileContent(filePath)
+            })
+        } else {
+            files.push(...await flattenFolder(filePath));
+        }
+    }
+
+    console.log("a", files)
+    return files
+}
+
 
 export async function updateCurrentFile(src) {
     fileCache[currentFilePath] = {
