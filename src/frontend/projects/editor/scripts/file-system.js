@@ -111,7 +111,7 @@ export async function getFolderData(path) {
 async function openFile(path) {
     currentFilePath = path;
     let content = await getFileContent(path)
-    editor.updateSyntaxHighlight(content);
+    editor.showFile(content);
 }
 
 export async function getFileContent(path) {
@@ -141,13 +141,11 @@ export async function flattenFolder(path = ".") {
             files.push(...await flattenFolder(filePath));
         }
     }
-
-    console.log("a", files)
     return files
 }
 
 
-export async function updateCurrentFile(src) {
+export function updateCurrentFile(src) {
     fileCache[currentFilePath] = {
         text: src,
         synced: false,

@@ -145,46 +145,8 @@ div[style*="visibility: hidden"]>*>*>.compile-error-popup {
     overflow: scroll;
 }
 
-#editor {
-    outline: none;
-    overflow: scroll;
-    padding: 4px;
-
-    >div>span {
-        font-family: "Roboto Mono", sans-serif;
-    }
-
-    .syntax-default {
-        color: #EEEEEE
-    }
-
-    .syntax-command {
-        color: #c586c0
-    }
-
-    .syntax-brackets {
-        color: #dcdcaa
-    }
-
-    .syntax-inlinemath {
-        color: #4ec9b0
-    }
-
-    .syntax-math {
-        color: #9cdcfe
-    }
-
-    .syntax-comment {
-        color: #3e7f65
-    }
-
-    .line {
-        min-height: 1em;
-    }
-
-    .highlight-error {
-        outline: red 1px solid;
-    }
+.cm-content * {
+    font-family: "Roboto Mono", monospace;
 }
 
 /* pdf */

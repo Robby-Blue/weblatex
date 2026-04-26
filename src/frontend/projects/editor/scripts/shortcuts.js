@@ -10,7 +10,7 @@ export function onShortcut(cb) {
   executeShortcut_cb = cb;
 }
 
-function table(src, pos, kwargs) {
+function table(_src, pos, kwargs) {
   if (kwargs.width < 0 || kwargs.height < 0) {
     return false;
   }
@@ -28,10 +28,11 @@ ${tableRows}
 \\end{tabular}
 \\end{center}`;
 
-  return insertText(src, pos, text);
+  return insertText(text, pos);
 }
 
 function matrix(src, pos, kwargs) {
+  let changes = []
   // TODO: add kwargs to allow other
   // kinda of matrices like pmatrix too
   if (kwargs.width < 0 || kwargs.height < 0) {
@@ -49,71 +50,88 @@ ${tableRows}
 \\end{bmatrix}
 \\]`;
 
-  src = insertText(src, pos, text);
-  src = addPackage("amsmath", src);
-  return src;
+  changes.push(insertText(text, pos));
+  changes.push(addPackage("amsmath", src));
+  return changes;
 }
 
 function vector(src, pos, kwargs) {
+  let changes = []
   if (kwargs.n < 0) {
-    return false;
+    return changes;
   }
 
   let innerCode = "v \\\\ ".repeat(kwargs.n).slice(0, -4);
 
   let text = `\\begin{pmatrix} ${innerCode} \\end{pmatrix}`
 
-  src = insertText(src, pos, text);
-  src = addPackage("amsmath", src);
-  return src;
+  changes.push(insertText(text, pos));
+  changes.push(addPackage("amsmath", src));
+  return changes;
 }
 
-function toggledarkmode(src, _, _2) {
-  src = addPackage("darkmode", src);
-  if (!src.includes("\\enabledarkmode")) {
-    let docPos = src.indexOf("usepackage{darkmode}");
-    let startPos = src.indexOf("\n", docPos) + 1;
-    src = insertText(src, startPos, "\\enabledarkmode\n");
+function toggledarkmode(src, _pos, _kwargs) {
+  let changes = []
 
-    return src;
-  }
+  changes.push(addPackage("darkmode", src))
 
-  let commandPos = src.indexOf("\\enabledarkmode");
-  let newlinePos = src.lastIndexOf("\n", commandPos);
-  let commentPos = src.lastIndexOf("%", commandPos);
-  let commentInLine = commentPos > newlinePos;
-  if (commentInLine) {
-    src = removeText(src, commentPos, 1);
+  if (src.includes("\\enabledarkmode")) {
+    changes.push(removeCommand("\\enabledarkmode", src))
   } else {
-    src = insertText(src, newlinePos + 1, "%");
+    changes.push(addPreamble("\\enabledarkmode", src))
   }
-  return src;
+
+  return changes;
 }
 
-function usepackage(src, pos, kwargs) {
-  src = addPackage(kwargs.name, src);
-  return src;
+function usepackage(src, _pos, kwargs) {
+  return addPackage(kwargs.name, src);
 }
 
 function addPackage(packageName, src) {
-  if (!src.includes(`\\usepackage{${packageName}}`)) {
-    let docPos = src.indexOf("documentclass");
-    let startPos = src.indexOf("\n", docPos) + 1;
-    src = insertText(src, startPos, `\\usepackage{${packageName}}\n`);
+  return addPreamble(`\\usepackage{${packageName}}`, src)
+}
+
+function addPreamble(command, src) {
+  if (!src.includes(`${command}`)) {
+    let pos = lineIndex("\\begin{document}", src)
+    return insertText(`\n${command}`, pos.start)
   }
-  return src;
+  return []
 }
 
-function insertText(src, pos, text) {
-  let srcStart = src.substring(0, pos);
-  let srcEnd = src.substring(pos);
-  return srcStart + text + srcEnd;
+function insertText(text, pos) {
+  return [{
+    from: pos,
+    insert: text
+  }]
 }
 
-function removeText(src, pos, chars) {
-  let srcStart = src.substring(0, pos);
-  let srcEnd = src.substring(pos + chars);
-  return srcStart + srcEnd;
+function lineIndex(text, src) {
+  let docPos = src.indexOf(text);
+  let startPos = src.lastIndexOf("\n", docPos);
+  let endPos = src.indexOf("\n", docPos) + 1;
+  return {
+    start: startPos,
+    end: endPos
+  }
+}
+
+function removeCommand(command, src) {
+  let start = src.indexOf(command)
+  if (start == -1) {
+    return []
+  }
+  let length = command.length
+
+  let offset = src.charAt(start - 1) == "\n" &&
+    src.charAt(start + length) == "\n" ? 1 : 0;
+  return [
+    {
+      from: start,
+      to: start + length + offset,
+    }
+  ];
 }
 
 let shortcuts = [

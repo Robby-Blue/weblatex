@@ -13,9 +13,14 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-RUN npm install texlyre-busytex && \
+RUN npm install codemirror codemirror-lang-latex @codemirror/theme-one-dark && \
+    npm install -D rollup @rollup/plugin-node-resolve && \
+    npm install texlyre-busytex && \
     npx texlyre-busytex download-assets ./dependencies && \
     cp -r node_modules dependencies/
+
+COPY frontend/projects/editor/scripts/codemirror.js .
+RUN npx rollup codemirror.js -f es -o codemirror.bundle.js -p @rollup/plugin-node-resolve
 
 # -- install python libs
 RUN python3 -m venv /venv
@@ -50,6 +55,7 @@ RUN apk add --no-cache \
 WORKDIR /app/weblatex
 COPY --from=builder /venv /venv
 COPY --from=builder /app/dependencies dependencies
+COPY --from=builder /app/codemirror.bundle.js frontend/projects/editor/scripts/codemirror.bundle.js
 ENV PATH="/venv/bin:$PATH"
 
 RUN git config --global init.defaultBranch main

@@ -4,7 +4,7 @@ import * as fs from "/projects/editor/file-system.js";
 import * as compileErrors from "/projects/editor/compile-error-handler.js";
 import * as settings from "/jsapis/settings.js";
 
-import { BusyTexRunner, XeLatex } from "/dependencies/node_modules/texlyre-busytex/dist/index.js";
+import { BusyTexRunner, XeLatex } from '/dependencies/node_modules/texlyre-busytex/dist/index.js';
 
 let pathName = decodeURIComponent(window.location.pathname);
 let projectPath = pathName.substring("/projects/editor/".length);
@@ -23,7 +23,7 @@ async function init() {
     if (compilationIsLocal) {
         busytexRunner = new BusyTexRunner({
             busytexBasePath: "/dependencies/busytex",
-            preloadDataPackages: ["/dependencies/busytex/texlive-recommended.js"],
+            preloadDataPackages: ["/dependencies/busytex/texlive-extra.js"],
         });
         await busytexRunner.initialize(true);
     } else {
@@ -78,9 +78,9 @@ async function compileLocally() {
     }
 }
 
-editor.onSave(async (src) => {
+editor.onSave(async () => {
     compileButton.classList.add("red");
-    let success = await fs.uploadCurrentFile(src);
+    let success = await fs.uploadCurrentFile();
     if (!success) return;
 
     if (!settings.getSetting("auto-compile")) return;
