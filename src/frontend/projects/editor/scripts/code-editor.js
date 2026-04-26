@@ -24,8 +24,18 @@ import {
     lintKeymap,
     keymap,
     insertNewline,
-    oneDark
+    oneDark,
+    Y, yCollab, WebsocketProvider
 } from "/projects/editor/codemirror.bundle.js"
+
+let pathName = decodeURIComponent(window.location.pathname);
+let projectPath = pathName.substring("/projects/editor/".length);
+
+let socketProtocol = location.protocol == "https:" ? "wss://" : "ws://";
+let socketUrl = socketProtocol + location.host;
+
+let provider = null
+let ytext = null
 
 let setup = [
     lineNumbers(),
@@ -54,12 +64,30 @@ let setup = [
     ])
 ]
 
-let extensions = [
-    setup,
-    latex({ enableTooltips: false }),
-    oneDark,
-    EditorView.updateListener.of(handleUpdate)
-]
+
+async function createExtensions(roomKey) {
+    if (provider) {
+        provider.disconnect()
+    }
+
+    let doc = new Y.Doc()
+    provider = new WebsocketProvider(socketUrl, `y/rooms/${roomKey}`, doc)
+    ytext = doc.getText("src")
+
+    provider.awareness.setLocalStateField("user", {
+        name: "Anonymous " + Math.floor(Math.random() * 100)
+    })
+
+    let extensions = [
+        setup,
+        latex({ enableTooltips: false }),
+        oneDark,
+        EditorView.updateListener.of(handleUpdate),
+        yCollab(ytext, provider.awareness)
+    ]
+
+    return extensions
+}
 
 let save_callback = null
 
@@ -92,18 +120,25 @@ function handleUpdate(update) {
 
 async function init() {
     editorView = new EditorView({
-        extensions: extensions,
         parent: editorDiv
     })
 }
 
-export function showFile(src) {
+export async function showFile(file_path, src) {
+    let roomKey = `${projectPath}/${file_path}`
+
+    let r = await fetch(`/y/room_status/${roomKey}`);
+    let room_data = await r.json()
+
     editorView.setState(
         EditorState.create({
-            doc: src,
-            extensions: extensions
+            extensions: await createExtensions(roomKey)
         })
-    );
+    )
+
+    if (!room_data.exists) {
+        ytext.insert(0, src)
+    }
 }
 
 function openShortcuts() {

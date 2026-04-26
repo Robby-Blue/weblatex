@@ -14,6 +14,7 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 RUN npm install codemirror codemirror-lang-latex @codemirror/theme-one-dark && \
+    npm install yjs y-codemirror.next y-websocket && \
     npm install -D rollup @rollup/plugin-node-resolve && \
     npm install texlyre-busytex && \
     npx texlyre-busytex download-assets ./dependencies && \

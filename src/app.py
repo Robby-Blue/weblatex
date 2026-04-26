@@ -1,8 +1,9 @@
 import eventlet
-eventlet.monkey_patch()
+# eventlet.monkey_patch()
 import eventlet.queue
 from flask import Flask, Response, send_from_directory, request, jsonify, redirect
 from flask_socketio import SocketIO, emit
+from flask_sock import Sock
 import os
 import signal
 import mimetypes
@@ -15,7 +16,8 @@ from backend import settings
 docker.init()
 
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode='eventlet')
+socketio = SocketIO(app, async_mode='threading')
+sock = Sock(app)
 
 job_queue = eventlet.queue.Queue()
 
@@ -670,8 +672,32 @@ def handle_compile():
     sid = request.sid
     job_queue.put(sid)
 
+rooms = {}
+
+@app.route("/y/room_status/<path:room>")
+def yjs_room_status(room):
+    return jsonify({
+        "exists": room in rooms.keys(),
+    })
+    
+@sock.route("/y/rooms/<path:room>")
+def yjs_room(ws, room):
+    if room not in rooms:
+        rooms[room] = []
+    rooms[room].append(ws)
+    try:
+        while True:
+            data = ws.receive()
+            for client in rooms[room]:
+                if client is not ws:
+                    client.send(data)
+    finally:
+        rooms[room].remove(ws)
+        if len(rooms[room]) == 0:
+            rooms.pop(room)
+
 def handle_sigterm(*args):
     socketio.stop()
 
 signal.signal(signal.SIGTERM, handle_sigterm)
-socketio.run(app, host="0.0.0.0", port=3000, log_output=True)
+socketio.run(app, host="0.0.0.0", port=3000, log_output=True, allow_unsafe_werkzeug=True)

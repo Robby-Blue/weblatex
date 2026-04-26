@@ -18,6 +18,10 @@ import { keymap } from "@codemirror/view"
 import { latex, } from "codemirror-lang-latex"
 import { oneDark } from "@codemirror/theme-one-dark"
 
+import * as Y from 'yjs'
+import { yCollab } from 'y-codemirror.next'
+import { WebsocketProvider } from 'y-websocket'
+
 export {
     EditorView, EditorState, latex,
     lineNumbers,
@@ -40,5 +44,6 @@ export {
     lintKeymap,
     keymap,
     insertNewline,
-    oneDark
+    oneDark,
+    Y, yCollab, WebsocketProvider
 }

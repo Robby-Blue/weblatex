@@ -111,7 +111,7 @@ export async function getFolderData(path) {
 async function openFile(path) {
     currentFilePath = path;
     let content = await getFileContent(path)
-    editor.showFile(content);
+    editor.showFile(path, content);
 }
 
 export async function getFileContent(path) {
