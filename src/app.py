@@ -1,12 +1,11 @@
-import eventlet
-# eventlet.monkey_patch()
-import eventlet.queue
 from flask import Flask, Response, send_from_directory, request, jsonify, redirect
 from flask_socketio import SocketIO, emit
 from flask_sock import Sock
 import os
 import signal
 import mimetypes
+import threading
+import queue
 
 from backend import docker
 from backend import users
@@ -19,7 +18,7 @@ app = Flask(__name__)
 socketio = SocketIO(app, async_mode='threading')
 sock = Sock(app)
 
-job_queue = eventlet.queue.Queue()
+job_queue = queue.Queue()
 
 static_folders = [
     {
@@ -148,7 +147,7 @@ def worker():
             pass
         job_queue.task_done()
         
-socketio.start_background_task(worker) 
+threading.Thread(target=worker).start()
         
 @app.route("/")
 def index():
