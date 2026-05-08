@@ -674,9 +674,10 @@ def handle_compile():
 
 rooms = {}
 
-@app.route("/y/room_status/<path:room>")
+@app.route("/y/status/<path:room>")
 def yjs_room_status(room):
     return jsonify({
+        "is_collab": False,
         "exists": room in rooms.keys(),
     })
     

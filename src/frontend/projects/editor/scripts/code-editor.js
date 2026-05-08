@@ -65,18 +65,10 @@ let setup = [
 ]
 
 
-async function createExtensions(roomKey) {
+async function createExtensions(isCollab, roomKey) {
     if (provider) {
         provider.disconnect()
     }
-
-    let doc = new Y.Doc()
-    provider = new WebsocketProvider(socketUrl, `y/rooms/${roomKey}`, doc)
-    ytext = doc.getText("src")
-
-    provider.awareness.setLocalStateField("user", {
-        name: "Anonymous " + Math.floor(Math.random() * 100)
-    })
 
     let extensions = [
         setup,
@@ -84,8 +76,20 @@ async function createExtensions(roomKey) {
         oneDark,
         EditorView.updateListener.of(handleUpdate),
         EditorView.lineWrapping,
-        yCollab(ytext, provider.awareness)
     ]
+
+    if (isCollab) {
+        let doc = new Y.Doc()
+        provider = new WebsocketProvider(socketUrl, `y/rooms/${roomKey}`, doc)
+        ytext = doc.getText("src")
+
+        provider.awareness.setLocalStateField("user", {
+            name: "Anonymous " + Math.floor(Math.random() * 100)
+        })
+
+        let y = yCollab(ytext, provider.awareness)
+        extensions.push(y)
+    }
 
     return extensions
 }
@@ -128,17 +132,29 @@ async function init() {
 export async function showFile(file_path, src) {
     let roomKey = `${projectPath}/${file_path}`
 
-    let r = await fetch(`/y/room_status/${roomKey}`);
-    let room_data = await r.json()
+    let r = await fetch(`/y/status/${roomKey}`);
+    let roomData = await r.json()
+
+    let isCollab = roomData.is_collab
 
     editorView.setState(
         EditorState.create({
-            extensions: await createExtensions(roomKey)
+            extensions: await createExtensions(isCollab, roomKey)
         })
     )
 
-    if (!room_data.exists) {
-        ytext.insert(0, src)
+    if (isCollab) {
+        if (!roomData.exists) {
+            ytext.insert(0, src)
+        }
+    } else {
+        editorView.dispatch({
+            changes: {
+                from: 0,
+                to: editorView.state.doc.length,
+                insert: src
+            }
+        });
     }
 }
 
