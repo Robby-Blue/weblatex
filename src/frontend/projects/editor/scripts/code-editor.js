@@ -83,6 +83,7 @@ async function createExtensions(roomKey) {
         latex({ enableTooltips: false }),
         oneDark,
         EditorView.updateListener.of(handleUpdate),
+        EditorView.lineWrapping,
         yCollab(ytext, provider.awareness)
     ]
 
