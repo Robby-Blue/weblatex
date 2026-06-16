@@ -279,10 +279,10 @@ WITH RECURSIVE project_hierarchy AS (
 SELECT * FROM project_hierarchy;
 """, (creator, project))
 
-def get_project_or_parents_git(creator, project_path):
-    project_path = normalize_path(project_path)
+def get_project_or_parents_git(creator, project):
+    project = normalize_path(project)
 
-    projects = get_projects_with_parents(creator, project_path)
+    projects = get_projects_with_parents(creator, project)
     if len(projects) == 0:
         return {"is_git": False}, False
     for project in projects:

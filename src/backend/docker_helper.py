@@ -34,7 +34,7 @@ def build_image():
         rm=True
     )
 
-def start_container(sid, username, project_path):
+def start_container(sid, username, project_path, globals_path):
     if sid in containers:
         return False
 
@@ -42,10 +42,14 @@ def start_container(sid, username, project_path):
     compile_timeout = setting["value"]
 
     path = os.path.realpath(project_path)
-    mnt = docker.types.Mount(type="bind", source=path, target="/compile")
+    mounts = []
+    
+    mounts.append(docker.types.Mount(target="/compile", source=path, type="bind"))
+    if globals_path:
+        mounts.append(docker.types.Mount(target="/globals", source=globals_path, type="bind"))
 
     container = docker_client.containers.run(image_name, detach=True, tty=True,
-        mounts=[mnt],
+        mounts=mounts,
         network_disabled=True,
         cpu_period=100000,
         cpu_quota=50000,
