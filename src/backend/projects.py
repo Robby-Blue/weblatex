@@ -31,7 +31,7 @@ def add_project(creator, parent_path, name, is_folder):
 (creator, path, parent_path, is_folder))
     os.mkdir(get_fs_path(creator, path, ""))
     if not is_folder:
-        add_template(creator, path, "empty_document")
+        add_template(creator, path, "minimal_document")
     return True, None
 
 def add_template(creator, project, template_name):
