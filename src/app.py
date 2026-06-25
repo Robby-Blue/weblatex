@@ -666,7 +666,7 @@ def handle_message(message):
     if git_proj_status["is_git"]:
         git_proj_path = git_proj_status["path"]
         git_proj_file_path = os.path.join(data_folder, username, git_proj_path)
-        globals_file_path = os.path.join(git_proj_file_path, "globals")
+        globals_file_path = os.path.join(git_proj_file_path, "globals/debug")
 
     success = docker.start_container(request.sid, username, project_path, globals_file_path)
     if not success:
